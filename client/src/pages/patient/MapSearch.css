@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
+
+.map-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.map-main {
+  flex: 1;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px var(--container-padding);
+  width: 100%;
+}
+
+.map-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--color-primary-text);
+}
+
+.map-subtitle {
+  color: var(--color-secondary-text);
+  margin-bottom: 32px;
+}
+
+.map-filter {
+  margin-bottom: 32px;
+}
+
+.map-filter-select {
+  padding: 12px 16px;
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-lg);
+  font-size: 15px;
+  font-family: 'DM Sans', sans-serif;
+  min-width: 200px;
+  color: var(--color-primary-text);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.map-filter-select:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+.map-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.map-empty {
+  text-align: center;
+  color: var(--color-secondary-text);
+  padding: 60px 0;
+}

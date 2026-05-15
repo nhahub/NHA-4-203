@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
+
+/* ============================================
+   Doctor Dashboard — EasyCare Design System
+   ============================================ */
+
+.doc-dash-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.doc-dash-main {
+  flex: 1;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px var(--container-padding);
+  width: 100%;
+}
+
+.doc-dash-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--color-primary-text);
+  margin-bottom: 8px;
+}
+
+.doc-dash-subtitle {
+  color: var(--color-secondary-text);
+  margin-bottom: 32px;
+}
+
+/* KPI Stats Grid */
+.doc-dash-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.doc-dash-stat-card {
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.doc-dash-stat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.doc-dash-stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.doc-dash-stat-icon.blue { background: rgba(0, 85, 150, 0.1); }
+.doc-dash-stat-icon.blue .material-symbols-outlined { color: var(--primary); }
+
+.doc-dash-stat-icon.amber { background: rgba(245, 158, 11, 0.1); }
+.doc-dash-stat-icon.amber .material-symbols-outlined { color: var(--warning); }
+
+.doc-dash-stat-icon.green { background: rgba(5, 150, 105, 0.1); }
+.doc-dash-stat-icon.green .material-symbols-outlined { color: #059669; }
+
+.doc-dash-stat-icon .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.doc-dash-stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-secondary-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.doc-dash-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-primary-text);
+}
+
+.doc-dash-section-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--color-primary-text);
+}
+
+.doc-dash-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.doc-dash-empty {
+  color: var(--color-secondary-text);
+}
