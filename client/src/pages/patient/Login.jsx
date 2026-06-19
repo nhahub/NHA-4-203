@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
+import { getRoleDashboard } from '../../utils/roleRoutes';
 import './Login.css';
 
 export default function Login() {
@@ -8,8 +9,14 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated && user?.role) {
+      navigate(getRoleDashboard(user.role), { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +27,7 @@ export default function Login() {
       // Redirect based on role
       if (user.role === 'admin') navigate('/admin/dashboard');
       else if (user.role === 'doctor') navigate('/doctor/dashboard');
-      else navigate('/patient/dashboard');
+      else navigate('/');
     } catch (err) {
       setError(
         err.response?.data?.message || 'Login failed. Please check your credentials.'

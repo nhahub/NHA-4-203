@@ -4,30 +4,36 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
 // POST /api/auth/register
+// Creates new user account - handles patient, doctor, and admin signup
 const register = async (req, res) => {
   try {
     const { name, email, password, role, phone } = req.body;
 
+    // Basic validation - should move to middleware later
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Name, email, and password are required' });
     }
 
+    // Check if email already exists (prevent duplicate accounts)
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'Email already registered' });
     }
 
+    // Hash password with salt (never store plain text passwords!)
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    // Create user in database
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      role: role || 'patient',
+      role: role || 'patient', // Default to patient if no role specified
       phone,
     });
 
+    // Generate JWT token - valid for 7 days (adjust as needed)
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,

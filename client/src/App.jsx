@@ -1,5 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
+import RoleRedirect from './components/RoleRedirect';
+import ScrollToTop from './components/ScrollToTop';
 import PageLoader from './components/PageLoader';
 import useAuth from './hooks/useAuth';
 
@@ -47,15 +49,17 @@ export default function App() {
   }
 
   return (
-    <Routes>
-      {/* ─── Public Routes ──────────────── */}
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+    <>
+      <ScrollToTop />
+      <Routes>
+      {/* ─── Public Routes (patient/guest only — staff redirected to portal) ─ */}
+      <Route path="/" element={<RoleRedirect><Home /></RoleRedirect>} />
+      <Route path="/login" element={<RoleRedirect><Login /></RoleRedirect>} />
+      <Route path="/register" element={<RoleRedirect><Register /></RoleRedirect>} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/doctors" element={<Doctors />} />
-      <Route path="/doctors/:id" element={<DoctorProfile />} />
+      <Route path="/doctors" element={<RoleRedirect><Doctors /></RoleRedirect>} />
+      <Route path="/doctors/:id" element={<RoleRedirect><DoctorProfile /></RoleRedirect>} />
 
       {/* ─── Patient Routes ─────────────── */}
       <Route
@@ -231,5 +235,6 @@ export default function App() {
         }
       />
     </Routes>
+    </>
   );
 }

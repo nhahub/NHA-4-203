@@ -40,6 +40,23 @@ export default function Settings() {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState({ text: '', type: '' });
 
+  // Doctor Professional Profile Form State
+  const [doctorId, setDoctorId] = useState('');
+  const [specialty, setSpecialty] = useState('');
+  const [clinic, setClinic] = useState('');
+  const [experience, setExperience] = useState(0);
+  const [lat, setLat] = useState('');
+  const [lng, setLng] = useState('');
+  const [professionalLoading, setProfessionalLoading] = useState(false);
+  const [professionalMessage, setProfessionalMessage] = useState({ text: '', type: '' });
+
+  // Doctor Availability Slots State
+  const [slots, setSlots] = useState([]);
+  const [newSlotStart, setNewSlotStart] = useState('');
+  const [newSlotEnd, setNewSlotEnd] = useState('');
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [slotsMessage, setSlotsMessage] = useState({ text: '', type: '' });
+
   // Fetch initial profile data
   useEffect(() => {
     const fetchProfile = async () => {
@@ -52,8 +69,34 @@ export default function Settings() {
         console.error('Failed to load profile');
       }
     };
+
+    const fetchDoctorProfile = async () => {
+      try {
+        const { data: doctors } = await api.getDoctors();
+        const myDoc = doctors.find((d) => d.userId?._id === user?._id || d.userId === user?._id);
+        if (myDoc) {
+          setDoctorId(myDoc._id);
+          setSpecialty(myDoc.specialty || '');
+          setClinic(myDoc.clinic || '');
+          setExperience(myDoc.experience || 0);
+          if (myDoc.location?.coordinates) {
+            setLng(myDoc.location.coordinates[0] || '');
+            setLat(myDoc.location.coordinates[1] || '');
+          }
+          // Fetch slots
+          const { data: slotsData } = await api.getSlots(myDoc._id);
+          setSlots(slotsData.slots || slotsData || []);
+        }
+      } catch (error) {
+        console.error('Failed to load doctor profile details:', error);
+      }
+    };
+
     fetchProfile();
-  }, []);
+    if (user?.role === 'doctor') {
+      fetchDoctorProfile();
+    }
+  }, [user]);
 
   const getAvatarSrc = () => {
     if (!profilePicture) return '';
@@ -149,6 +192,90 @@ export default function Settings() {
     }
   };
 
+  const handleProfessionalSubmit = async (e) => {
+    e.preventDefault();
+    setProfessionalLoading(true);
+    setProfessionalMessage({ text: '', type: '' });
+
+    const coords = [parseFloat(lng) || 31.2357, parseFloat(lat) || 30.0444];
+
+    const payload = {
+      specialty,
+      clinic,
+      experience: parseInt(experience) || 0,
+      location: {
+        type: 'Point',
+        coordinates: coords,
+      },
+    };
+
+    try {
+      if (doctorId) {
+        await api.updateDoctorProfile(doctorId, payload);
+        setProfessionalMessage({ text: 'Professional profile updated successfully!', type: 'success' });
+      } else {
+        const { data } = await api.createDoctor(payload);
+        setDoctorId(data._id);
+        setProfessionalMessage({ text: 'Professional profile created successfully!', type: 'success' });
+      }
+      setTimeout(() => setProfessionalMessage({ text: '', type: '' }), 3000);
+    } catch (err) {
+      setProfessionalMessage({
+        text: err.response?.data?.message || 'Failed to update professional settings.',
+        type: 'error',
+      });
+    } finally {
+      setProfessionalLoading(false);
+    }
+  };
+
+  const handleAddSlot = async (e) => {
+    e.preventDefault();
+    if (!newSlotStart || !newSlotEnd) {
+      setSlotsMessage({ text: 'Please enter both start and end times.', type: 'error' });
+      return;
+    }
+    setSlotsLoading(true);
+    setSlotsMessage({ text: '', type: '' });
+    try {
+      const { data } = await api.createSlot({
+        startTime: newSlotStart,
+        endTime: newSlotEnd,
+      });
+      setSlots((prev) => [...prev, data]);
+      setNewSlotStart('');
+      setNewSlotEnd('');
+      setSlotsMessage({ text: 'Availability slot added successfully!', type: 'success' });
+      setTimeout(() => setSlotsMessage({ text: '', type: '' }), 3000);
+    } catch (err) {
+      setSlotsMessage({
+        text: err.response?.data?.message || 'Failed to add slot.',
+        type: 'error',
+      });
+    } finally {
+      setSlotsLoading(false);
+    }
+  };
+
+  const handleDeleteSlot = async (slotId) => {
+    if (!window.confirm('Are you sure you want to delete this availability slot?')) return;
+    setSlotsLoading(true);
+    setSlotsMessage({ text: '', type: '' });
+    try {
+      await api.deleteSlot(slotId);
+      setSlots((prev) => prev.filter((s) => s._id !== slotId));
+      setSlotsMessage({ text: 'Slot deleted successfully.', type: 'success' });
+      setTimeout(() => setSlotsMessage({ text: '', type: '' }), 3000);
+    } catch (err) {
+      setSlotsMessage({
+        text: err.response?.data?.message || 'Failed to delete slot.',
+        type: 'error',
+      });
+    } finally {
+      setSlotsLoading(false);
+    }
+  };
+
   const renderContent = () => (
     <div className="settings-container">
       <div className="settings-header">
@@ -164,6 +291,24 @@ export default function Settings() {
           <span className="material-symbols-outlined">person</span>
           Profile
         </button>
+        {user?.role === 'doctor' && (
+          <>
+            <button
+              className={`settings-tab ${activeTab === 'professional' ? 'active' : ''}`}
+              onClick={() => setActiveTab('professional')}
+            >
+              <span className="material-symbols-outlined">medical_services</span>
+              Professional Profile
+            </button>
+            <button
+              className={`settings-tab ${activeTab === 'slots' ? 'active' : ''}`}
+              onClick={() => setActiveTab('slots')}
+            >
+              <span className="material-symbols-outlined">schedule</span>
+              Availability Slots
+            </button>
+          </>
+        )}
         <button
           className={`settings-tab ${activeTab === 'security' ? 'active' : ''}`}
           onClick={() => setActiveTab('security')}
@@ -318,6 +463,181 @@ export default function Settings() {
               </button>
             </div>
           </form>
+        )}
+
+        {user?.role === 'doctor' && activeTab === 'professional' && (
+          <form className="settings-form" onSubmit={handleProfessionalSubmit}>
+            {professionalMessage.text && (
+              <div className={`settings-alert ${professionalMessage.type}`}>
+                {professionalMessage.text}
+              </div>
+            )}
+
+            <div className="settings-form-row">
+              <div className="settings-form-group">
+                <label>Medical Specialty</label>
+                <select
+                  required
+                  value={specialty}
+                  onChange={(e) => setSpecialty(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: '1px solid var(--outline, #cbd5e1)',
+                    borderRadius: 'var(--radius-md, 8px)',
+                    fontSize: '14px',
+                    color: 'var(--color-primary-text, #0f172a)',
+                    background: 'var(--surface, #ffffff)',
+                  }}
+                >
+                  <option value="">Select Specialty</option>
+                  <option value="Cardiology">Cardiology</option>
+                  <option value="Pediatrics">Pediatrics</option>
+                  <option value="Dermatology">Dermatology</option>
+                  <option value="General Practice">General Practice</option>
+                  <option value="Dentistry">Dentistry</option>
+                  <option value="Neurology">Neurology</option>
+                  <option value="Orthopedics">Orthopedics</option>
+                </select>
+              </div>
+              <div className="settings-form-group">
+                <label>Years of Experience</label>
+                <input
+                  type="number"
+                  min="0"
+                  required
+                  value={experience}
+                  onChange={(e) => setExperience(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="settings-form-group">
+              <label>Clinic Address</label>
+              <input
+                type="text"
+                required
+                value={clinic}
+                onChange={(e) => setClinic(e.target.value)}
+                placeholder="e.g. 12 El-Galaa St., Heliopolis, Cairo"
+              />
+            </div>
+
+            <div className="settings-form-row">
+              <div className="settings-form-group">
+                <label>Location Longitude (for Map Search)</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  required
+                  value={lng}
+                  onChange={(e) => setLng(e.target.value)}
+                  placeholder="e.g. 31.2357"
+                />
+              </div>
+              <div className="settings-form-group">
+                <label>Location Latitude (for Map Search)</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  required
+                  value={lat}
+                  onChange={(e) => setLat(e.target.value)}
+                  placeholder="e.g. 30.0444"
+                />
+              </div>
+            </div>
+            <span className="settings-help-text" style={{ marginBottom: '24px' }}>
+              These coordinates position your clinic on the Map Search page. (Cairo center: 31.2357, 30.0444)
+            </span>
+
+            <div className="settings-form-actions">
+              <button type="submit" className="settings-btn-primary" disabled={professionalLoading}>
+                {professionalLoading ? 'Saving...' : 'Save Professional Profile'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {user?.role === 'doctor' && activeTab === 'slots' && (
+          <div className="slots-manager-box">
+            {slotsMessage.text && (
+              <div className={`settings-alert ${slotsMessage.type}`}>
+                {slotsMessage.text}
+              </div>
+            )}
+
+            {!doctorId ? (
+              <div className="slots-empty-state" style={{ borderStyle: 'solid' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--warning)' }}>warning</span>
+                <h3 style={{ fontSize: '18px', fontWeight: 'bold' }}>Professional Profile Required</h3>
+                <p style={{ color: 'var(--color-secondary-text)', fontSize: '14px', marginTop: '8px' }}>
+                  Please complete and save your Professional Profile first before managing availability slots.
+                </p>
+              </div>
+            ) : (
+              <>
+                <form className="slots-add-form" onSubmit={handleAddSlot}>
+                  <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '16px' }}>Add Availability Slot</h3>
+                  <div className="settings-form-row" style={{ marginBottom: '16px' }}>
+                    <div className="settings-form-group" style={{ margin: 0 }}>
+                      <label>Start Time</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 9:00 AM or 14:00"
+                        required
+                        value={newSlotStart}
+                        onChange={(e) => setNewSlotStart(e.target.value)}
+                      />
+                    </div>
+                    <div className="settings-form-group" style={{ margin: 0 }}>
+                      <label>End Time</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 10:00 AM or 15:00"
+                        required
+                        value={newSlotEnd}
+                        onChange={(e) => setNewSlotEnd(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <button type="submit" className="settings-btn-primary" disabled={slotsLoading}>
+                    Add Time Slot
+                  </button>
+                </form>
+
+                <div className="slots-list-section">
+                  <h3>Active Availability Slots</h3>
+                  {slots.length > 0 ? (
+                    <div className="slots-grid">
+                      {slots.map((s) => (
+                        <div key={s._id} className="slot-item-card">
+                          <div className="slot-item-info">
+                            <span className="material-symbols-outlined">schedule</span>
+                            <span>{s.startTime} - {s.endTime}</span>
+                          </div>
+                          <button
+                            type="button"
+                            className="slot-item-delete-btn"
+                            onClick={() => handleDeleteSlot(s._id)}
+                            disabled={slotsLoading}
+                            title="Delete Slot"
+                          >
+                            <span className="material-symbols-outlined">delete</span>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="slots-empty-state">
+                      <span className="material-symbols-outlined" style={{ fontSize: '36px' }}>calendar_today</span>
+                      <p>No availability slots defined. Patients won't be able to book appointments with you until you add some slots.</p>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
         )}
       </div>
     </div>

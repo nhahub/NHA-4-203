@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { getDoctor, getDoctorReviews, getSlots } from '../../services/api';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { getDoctor, getDoctorReviews, getSlots, createBooking, createReview } from '../../services/api';
+import useAuth from '../../hooks/useAuth';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import RatingStars from '../../components/RatingStars';
@@ -8,11 +9,34 @@ import './DoctorProfile.css';
 
 export default function DoctorProfile() {
   const { id } = useParams();
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
   const [doctor, setDoctor] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Selected Booking Info
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [visitReason, setVisitReason] = useState('General Consultation');
+  const [consultType, setConsultType] = useState('In-Clinic');
+  const [notes, setNotes] = useState('');
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingSuccess, setBookingSuccess] = useState('');
+  const [bookingError, setBookingError] = useState('');
+
+  // Review Form Info
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewHover, setReviewHover] = useState(0);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewSuccess, setReviewSuccess] = useState('');
+  const [reviewError, setReviewError] = useState('');
+
+  // Tab management
+  const [activeTab, setActiveTab] = useState('about'); // about, schedule, reviews
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,8 +48,12 @@ export default function DoctorProfile() {
         ]);
         setDoctor(docRes.data.doctor || docRes.data);
         setReviews(revRes.data.reviews || revRes.data || []);
-        setSlots(slotRes.data.slots || slotRes.data || []);
+        
+        // Filter out booked slots
+        const available = (slotRes.data.slots || slotRes.data || []).filter(s => !s.isBooked);
+        setSlots(available);
       } catch (err) {
+        console.error('Failed to load profile details:', err);
         setError('Failed to load doctor profile.');
       } finally {
         setLoading(false);
@@ -33,6 +61,84 @@ export default function DoctorProfile() {
     };
     fetchData();
   }, [id]);
+
+  const handleBookingSubmit = async () => {
+    if (!isAuthenticated) {
+      setBookingError('Please log in to book an appointment.');
+      return;
+    }
+    if (user?.role !== 'patient') {
+      setBookingError('Only patients can book appointments.');
+      return;
+    }
+    if (!selectedSlot) {
+      setBookingError('Please select a time slot from the schedule.');
+      return;
+    }
+
+    setBookingLoading(true);
+    setBookingError('');
+    setBookingSuccess('');
+
+    try {
+      const payload = {
+        doctorId: id,
+        slotId: selectedSlot._id,
+        notes: `${visitReason} (${consultType}) - ${notes}`.trim()
+      };
+      await createBooking(payload);
+      setBookingSuccess('Booking confirmed successfully!');
+      setSelectedSlot(null);
+      // Refresh available slots
+      const slotRes = await getSlots(id);
+      const available = (slotRes.data.slots || slotRes.data || []).filter(s => !s.isBooked);
+      setSlots(available);
+      
+      setTimeout(() => {
+        navigate('/patient/appointments');
+      }, 2000);
+    } catch (err) {
+      console.error(err);
+      setBookingError(err.response?.data?.message || 'Failed to complete booking. Please try again.');
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      setReviewError('You must be logged in to write a review.');
+      return;
+    }
+    if (reviewRating === 0) {
+      setReviewError('Please select a star rating.');
+      return;
+    }
+
+    setReviewSubmitting(true);
+    setReviewError('');
+    setReviewSuccess('');
+
+    try {
+      const { data } = await createReview(id, {
+        rating: reviewRating,
+        comment: reviewComment.trim()
+      });
+
+      setReviews(prev => [
+        { ...data, patientId: { name: user?.name || 'You' } },
+        ...prev
+      ]);
+      setReviewRating(0);
+      setReviewComment('');
+      setReviewSuccess('Your review has been submitted successfully.');
+    } catch (err) {
+      setReviewError(err.response?.data?.message || 'Failed to submit review.');
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -43,106 +149,460 @@ export default function DoctorProfile() {
     );
   }
 
-  if (error) {
+  if (error || !doctor) {
     return (
       <div className="doctor-profile-page">
         <Navbar />
         <main className="doctor-profile-main">
-          <div className="error-message">{error}</div>
-        </main>
-      </div>
-    );
-  }
-
-  if (!doctor) {
-    return (
-      <div className="doctor-profile-page">
-        <Navbar />
-        <main className="doctor-profile-main">
-          <p>Doctor not found.</p>
+          <div className="error-message">{error || 'Doctor not found.'}</div>
         </main>
       </div>
     );
   }
 
   const name = doctor.userId?.name || 'Doctor';
+  const specialty = doctor.specialty || 'General Practitioner';
+  const avatar = doctor.userId?.avatar;
+  const experience = doctor.experience || 5;
+  const clinicName = doctor.clinic || 'City Health Center';
+  const rating = doctor.rating || 4.5;
+  const reviewsCount = doctor.reviewsCount || 0;
+  const isVerified = doctor.isVerified;
 
   return (
     <div className="doctor-profile-page">
       <Navbar />
-      <main className="doctor-profile-main">
-        {/* Profile Card */}
-        <div className="doctor-profile-card">
-          <div className="doctor-profile-banner">
-            <div className="doctor-profile-avatar">
-              <span className="material-symbols-outlined">person</span>
-            </div>
-          </div>
-          <div className="doctor-profile-body">
-            <h1 className="doctor-profile-name">{name}</h1>
-            <p className="doctor-profile-specialty">
-              {doctor.specialty || 'General Practice'}
-            </p>
-            {doctor.clinic && (
-              <p className="doctor-profile-clinic">
-                <span className="material-symbols-outlined">location_on</span>
-                {doctor.clinic}
-              </p>
-            )}
-            <div className="doctor-profile-rating">
-              <RatingStars
-                rating={doctor.rating || 0}
-                reviewsCount={doctor.reviewsCount}
-                size="md"
-              />
-            </div>
-            {doctor.bio && (
-              <p className="doctor-profile-bio">{doctor.bio}</p>
-            )}
-            <Link to={`/patient/book/${id}`} className="doctor-profile-book-btn">
-              <span className="material-symbols-outlined">calendar_month</span>
-              Book Appointment
-            </Link>
-          </div>
+
+      <main className="profile-main-content">
+        {/* Banner header gradient */}
+        <div className="profile-hero-banner">
+          <div className="banner-pattern-overlay"></div>
         </div>
 
-        {/* Available Slots */}
-        {slots.length > 0 && (
-          <div className="doctor-profile-section">
-            <h2 className="doctor-profile-section-title">Available Slots</h2>
-            <div className="doctor-profile-slots">
-              {slots.slice(0, 12).map((slot, i) => (
-                <span key={i} className="doctor-profile-slot-chip">
-                  {new Date(slot.date || slot.startTime).toLocaleDateString()}{' '}
-                  {slot.time || ''}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Reviews */}
-        {reviews.length > 0 && (
-          <div className="doctor-profile-section">
-            <h2 className="doctor-profile-section-title">Patient Reviews</h2>
-            <div className="doctor-profile-reviews">
-              {reviews.map((rev, i) => (
-                <div key={i} className="doctor-profile-review-card">
-                  <div className="doctor-profile-review-header">
-                    <span className="doctor-profile-review-name">
-                      {rev.patientId?.name || 'Patient'}
-                    </span>
-                    <RatingStars rating={rev.rating || 0} size="sm" />
+        <div className="profile-container-wrapper">
+          <div className="profile-columns-layout">
+            
+            {/* Left Column: Details & Schedule */}
+            <div className="profile-details-column">
+              
+              {/* Profile Main Card */}
+              <div className="profile-header-card">
+                {isVerified && (
+                  <div className="profile-verified-badge">
+                    <span className="material-symbols-outlined icon-fill">verified</span>
+                    <span>Verified Profile</span>
                   </div>
-                  {rev.comment && (
-                    <p className="doctor-profile-review-comment">{rev.comment}</p>
-                  )}
+                )}
+
+                <div className="profile-avatar-row">
+                  <div className="profile-avatar-container">
+                    {avatar ? (
+                      <img src={avatar} alt={name} className="profile-img-tag" />
+                    ) : (
+                      <div className="profile-avatar-placeholder">
+                        <span className="material-symbols-outlined">person</span>
+                      </div>
+                    )}
+                    <span className="active-green-dot"></span>
+                  </div>
+
+                  <div className="profile-text-details">
+                    <h2 className="doctor-full-name">{name}</h2>
+                    <p className="doctor-sub-info">
+                      <span className="specialty-text">{specialty}</span>
+                      <span className="bullet-dot"></span>
+                      <span className="exp-text">{experience} Years Experience</span>
+                    </p>
+
+                    <div className="rating-location-row">
+                      <div className="rating-snippet">
+                        <span className="material-symbols-outlined rating-star icon-fill">star</span>
+                        <span className="rating-score-bold">{rating.toFixed(1)}</span>
+                        <span className="rating-count-text">({reviewsCount} Reviews)</span>
+                      </div>
+                      <div className="location-snippet">
+                        <span className="material-symbols-outlined">location_on</span>
+                        <span>{clinicName}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ))}
+
+                {/* Bento Quick Stats */}
+                <div className="profile-bento-grid">
+                  <div className="bento-box bg-blue">
+                    <p className="bento-label">Consultation</p>
+                    <p className="bento-value">$120</p>
+                  </div>
+                  <div className="bento-box bg-teal">
+                    <p className="bento-label">Patients</p>
+                    <p className="bento-value">1.5k+</p>
+                  </div>
+                  <div className="bento-box bg-amber">
+                    <p className="bento-label">Success Rate</p>
+                    <p className="bento-value">99%</p>
+                  </div>
+                  <div className="bento-box bg-slate">
+                    <p className="bento-label">Languages</p>
+                    <p className="bento-value">EN, ES</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Navigation Tabs */}
+              <div className="profile-navigation-tabs">
+                <button 
+                  className={`tab-btn ${activeTab === 'about' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('about')}
+                >
+                  <span className="material-symbols-outlined">person</span>
+                  About
+                </button>
+                <button 
+                  className={`tab-btn ${activeTab === 'schedule' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('schedule')}
+                >
+                  <span className="material-symbols-outlined">calendar_month</span>
+                  Availability
+                </button>
+                <button 
+                  className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('reviews')}
+                >
+                  <span className="material-symbols-outlined">rate_review</span>
+                  Reviews ({reviews.length})
+                </button>
+              </div>
+
+              {/* Tab Content: About */}
+              {activeTab === 'about' && (
+                <div className="tab-content-panel fade-in">
+                  <div className="profile-bio-box">
+                    <h3 className="section-block-title">Professional Biography</h3>
+                    <p className="bio-description-text">
+                      {doctor.bio || `Dr. ${name} is a highly accomplished ${specialty.toLowerCase()} specialist with extensive experience in clinical care. Committed to delivering advanced, personalized health treatments with an empathetic approach, Dr. ${name} strives to support every patient through their wellness journey.`}
+                    </p>
+                    
+                    <div className="bio-grid-blocks">
+                      <div className="bio-sub-block">
+                        <h4 className="bio-block-heading">
+                          <span className="material-symbols-outlined">school</span>
+                          Education
+                        </h4>
+                        <ul className="bio-education-list">
+                          <li>
+                            <span className="bullet"></span>
+                            <div>
+                              <p className="inst-name">Harvard Medical School</p>
+                              <p className="degree-name">Doctor of Medicine (M.D.)</p>
+                            </div>
+                          </li>
+                          <li>
+                            <span className="bullet"></span>
+                            <div>
+                              <p className="inst-name">Johns Hopkins University</p>
+                              <p className="degree-name">Residency & fellowship</p>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div className="bio-sub-block">
+                        <h4 className="bio-block-heading">
+                          <span className="material-symbols-outlined">emoji_events</span>
+                          Specializations
+                        </h4>
+                        <div className="spec-badges-container">
+                          <span className="spec-capsule">Clinical Care</span>
+                          <span className="spec-capsule">Diagnostics</span>
+                          <span className="spec-capsule">Chronic Management</span>
+                          <span className="spec-capsule">Preventative Health</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab Content: Availability */}
+              {activeTab === 'schedule' && (
+                <div className="tab-content-panel fade-in">
+                  <div className="profile-schedule-box">
+                    <h3 className="section-block-title">Weekly Slots Schedule</h3>
+                    <p className="schedule-helper-text">Select an active slot. The details will update in the booking card on the right.</p>
+                    
+                    {slots.length > 0 ? (
+                      <div className="slots-capsules-grid">
+                        {slots.map((slot) => {
+                          const isSelected = selectedSlot?._id === slot._id;
+                          return (
+                            <button 
+                              key={slot._id}
+                              className={`slot-time-capsule ${isSelected ? 'selected' : ''}`}
+                              onClick={() => setSelectedSlot(slot)}
+                            >
+                              <span className="material-symbols-outlined">schedule</span>
+                              <span>{slot.startTime} - {slot.endTime}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="schedule-empty-state">
+                        <span className="material-symbols-outlined">event_busy</span>
+                        <p>No available slots scheduled for Dr. {name} at the moment.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Tab Content: Reviews */}
+              {activeTab === 'reviews' && (
+                <div className="tab-content-panel fade-in">
+                  <div className="profile-reviews-box">
+                    <h3 className="section-block-title">Patient Reviews</h3>
+                    
+                    {/* Add Review Form */}
+                    {isAuthenticated && user?.role === 'patient' && (
+                      <div className="write-review-form-wrapper">
+                        <h4 className="write-review-title">Write a Review</h4>
+                        
+                        {reviewSuccess && <div className="review-alert success-style"><span className="material-symbols-outlined">check_circle</span>{reviewSuccess}</div>}
+                        {reviewError && <div className="review-alert error-style"><span className="material-symbols-outlined">error</span>{reviewError}</div>}
+
+                        <form className="review-input-form" onSubmit={handleReviewSubmit}>
+                          <div className="rating-select-group">
+                            <span className="rating-label-title">Your Rating:</span>
+                            <div className="rating-stars-selection">
+                              {[1,2,3,4,5].map(star => (
+                                <button
+                                  key={star}
+                                  type="button"
+                                  className={`star-select-btn ${(reviewHover || reviewRating) >= star ? 'active' : ''}`}
+                                  onClick={() => setReviewRating(star)}
+                                  onMouseEnter={() => setReviewHover(star)}
+                                  onMouseLeave={() => setReviewHover(0)}
+                                >
+                                  <span className="material-symbols-outlined icon-fill">star</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="comment-textarea-group">
+                            <textarea
+                              placeholder="Write a comment about your checkup experience..."
+                              className="comment-textarea"
+                              rows={3}
+                              value={reviewComment}
+                              onChange={(e) => setReviewComment(e.target.value)}
+                            ></textarea>
+                          </div>
+
+                          <button 
+                            type="submit" 
+                            className="btn-submit-review"
+                            disabled={reviewSubmitting || reviewRating === 0}
+                          >
+                            {reviewSubmitting ? 'Submitting...' : 'Submit Review'}
+                          </button>
+                        </form>
+                      </div>
+                    )}
+
+                    {/* Reviews List */}
+                    {reviews.length > 0 ? (
+                      <div className="reviews-cards-list">
+                        {reviews.map((rev) => (
+                          <div key={rev._id} className="review-comment-card">
+                            <div className="review-card-header">
+                              <span className="review-author-name">{rev.patientId?.name || 'Anonymous Patient'}</span>
+                              <RatingStars rating={rev.rating || 0} size="sm" />
+                            </div>
+                            {rev.comment && <p className="review-comment-body">"{rev.comment}"</p>}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="reviews-empty-state">
+                        <span className="material-symbols-outlined">rate_review</span>
+                        <p>No reviews posted yet.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
             </div>
+
+            {/* Right Column: Sticky Booking Card & Map */}
+            <div className="profile-booking-column">
+              <div className="sticky-booking-card-wrapper">
+                
+                {/* Main booking container */}
+                <div className="booking-premium-form-card">
+                  <div className="booking-card-header bg-primary-theme">
+                    <h3 className="booking-card-title">Book Appointment</h3>
+                    <p className="booking-card-subtitle">Secure your slot with {name}</p>
+                  </div>
+
+                  <div className="booking-card-body">
+                    {/* Booking message alerts */}
+                    {bookingSuccess && <div className="booking-alert success-style"><span className="material-symbols-outlined">check_circle</span>{bookingSuccess}</div>}
+                    {bookingError && <div className="booking-alert error-style"><span className="material-symbols-outlined">error</span>{bookingError}</div>}
+
+                    {/* Next slot notification box */}
+                    {slots.length > 0 ? (
+                      <div className="next-available-slot-box">
+                        <div className="slot-calendar-badge">
+                          <span className="cal-month">OCT</span>
+                          <span className="cal-day">25</span>
+                        </div>
+                        <div className="slot-badge-details">
+                          <p className="slot-badge-title">Available Slot Ready</p>
+                          <p className="slot-badge-time">Select from schedule options</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="next-available-slot-box no-slots">
+                        <div className="slot-badge-details">
+                          <p className="slot-badge-title">No Slots Available</p>
+                          <p className="slot-badge-time">Please contact hospital</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Selected Slot Information */}
+                    {selectedSlot && (
+                      <div className="selected-slot-preview">
+                        <span className="material-symbols-outlined text-blue">event_available</span>
+                        <div className="preview-text">
+                          <p className="preview-label">Selected Schedule Slot</p>
+                          <p className="preview-value">{selectedSlot.startTime} - {selectedSlot.endTime}</p>
+                        </div>
+                        <button className="btn-clear-slot" onClick={() => setSelectedSlot(null)}>
+                          <span className="material-symbols-outlined">close</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Form Controls */}
+                    <div className="booking-inputs-group">
+                      <div className="booking-field-row">
+                        <label className="booking-field-label">Visit Reason</label>
+                        <select 
+                          className="booking-field-select"
+                          value={visitReason}
+                          onChange={(e) => setVisitReason(e.target.value)}
+                        >
+                          <option value="General Consultation">General Cardiac Checkup</option>
+                          <option value="Hypertension Management">Hypertension Management</option>
+                          <option value="Chest Pain Consultation">Chest Pain Consultation</option>
+                          <option value="Follow-up Visit">Follow-up Visit</option>
+                        </select>
+                      </div>
+
+                      <div className="booking-field-row">
+                        <label className="booking-field-label">Consultation Type</label>
+                        <div className="consult-type-selector-grid">
+                          <button 
+                            type="button"
+                            className={`type-select-btn ${consultType === 'In-Clinic' ? 'active' : ''}`}
+                            onClick={() => setConsultType('In-Clinic')}
+                          >
+                            <span className="material-symbols-outlined">apartment</span>
+                            In-Clinic
+                          </button>
+                          <button 
+                            type="button"
+                            className={`type-select-btn ${consultType === 'Video Call' ? 'active' : ''}`}
+                            onClick={() => setConsultType('Video Call')}
+                          >
+                            <span className="material-symbols-outlined">videocam</span>
+                            Video Call
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="booking-field-row">
+                        <label className="booking-field-label">Notes for Doctor</label>
+                        <textarea 
+                          placeholder="Type optional symptoms or details..."
+                          className="booking-field-textarea"
+                          rows={2}
+                          value={notes}
+                          onChange={(e) => setNotes(e.target.value)}
+                        ></textarea>
+                      </div>
+                    </div>
+
+                    {/* Pricing calculation summary */}
+                    <div className="booking-pricing-breakdown">
+                      <div className="pricing-row">
+                        <span className="pricing-label">Consultation Fee</span>
+                        <span className="pricing-amount">$120.00</span>
+                      </div>
+                      <div className="pricing-row">
+                        <span className="pricing-label">Booking Service Fee</span>
+                        <span className="pricing-amount">$5.00</span>
+                      </div>
+                      <div className="pricing-total-row">
+                        <span className="total-label">Total Payable</span>
+                        <span className="total-amount">$125.00</span>
+                      </div>
+                    </div>
+
+                    {/* Submit Booking Button */}
+                    <button 
+                      className="btn-confirm-booking"
+                      onClick={handleBookingSubmit}
+                      disabled={bookingLoading}
+                    >
+                      {bookingLoading ? 'Confirming Booking...' : 'Confirm Booking'}
+                    </button>
+
+                    <p className="cancellation-policy-text">
+                      Free cancellation up to 24 hours before the appointment
+                    </p>
+                  </div>
+                </div>
+
+                {/* Map Card */}
+                <div className="booking-map-card">
+                  <div className="booking-map-media">
+                    <img 
+                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZ4zxtogPm9DM9XBnRaY9ftOJ2dvDvhFLqQFEGjAN_wB6jxXZraql3wY3iG4sPy-SESrPSNaDjwjc0A-yMP1NIY1Y7pEyEwtrBAZQhEsKcPrwruj4FfXswMZsu9Yd01jrDUE6Rs3uSINVQYye1_EOstKjl1iMw7oBtjH51Zv-9ZzG8-SA24c9QR9zfnmOTq1P22mL0AjchHXKdWeOuBn41vE2zidb3lpEnL2qv_MAPis0NRAKqxtKaqjaWTOn0fMaj2dcnR_DfRBPx" 
+                      alt="Clinic Map" 
+                      className="booking-map-img" 
+                    />
+                    <div className="booking-map-overlay"></div>
+                    <div className="booking-map-pin-bounce">
+                      <span className="material-symbols-outlined icon-fill">location_on</span>
+                    </div>
+                  </div>
+                  <div className="booking-map-details">
+                    <p className="map-clinic-title">{clinicName}</p>
+                    <p className="map-clinic-address">4521 Madison Avenue, 3rd Floor, NY 10022</p>
+                    <a 
+                      href={`https://maps.google.com/?q=${encodeURIComponent(clinicName + ' NY')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="map-get-directions-btn"
+                    >
+                      Get Directions
+                      <span className="material-symbols-outlined">arrow_forward</span>
+                    </a>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
           </div>
-        )}
+        </div>
       </main>
+
       <Footer />
     </div>
   );

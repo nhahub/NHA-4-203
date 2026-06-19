@@ -33,6 +33,11 @@ export const getDoctors = (params) => API.get('/doctors', { params });
 export const getDoctor = (id) => API.get(`/doctors/${id}`);
 export const getNearbyDoctors = (lng, lat, maxDistance) =>
   API.get('/doctors/nearby', { params: { lng, lat, maxDistance } });
+export const getMyDoctorProfile = () => API.get('/doctors/me/profile');
+export const getDoctorAnalytics = (days) =>
+  API.get('/doctors/me/analytics', { params: days ? { days } : {} });
+export const createDoctor = (data) => API.post('/doctors', data);
+export const updateDoctorProfile = (id, data) => API.put(`/doctors/${id}/profile`, data);
 
 // Hospitals
 export const getHospitals = () => API.get('/hospitals');
@@ -62,6 +67,9 @@ export const uploadResult = (formData) =>
   API.post('/results/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
+export const getDoctorResults = () => API.get('/results/doctor/all');
+export const updateResultStatus = (id, status) =>
+  API.put(`/results/${id}/status`, { status });
 export const getPatientResults = (patientId) => API.get(`/results/${patientId}`);
 
 // Reviews

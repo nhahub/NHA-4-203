@@ -1,4 +1,5 @@
 const dns = require('dns');
+// DNS config for reliability (some ISPs have issues with default resolver)
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 const express = require('express');
@@ -7,18 +8,20 @@ const dotenv = require('dotenv');
 const path = require('path');
 const connectDB = require('./config/db');
 
+// Load environment variables from .env file
 dotenv.config();
 
+// Connect to MongoDB database
 connectDB();
 
 const app = express();
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Middleware setup
+app.use(cors()); // Allow cross-origin requests from frontend
+app.use(express.json()); // Parse incoming JSON requests
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve uploaded files (profile pics, lab results)
 
-// Route mounts
+// Route mounts - all API routes prefixed with /api
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/doctors', require('./routes/doctorRoutes'));
@@ -34,11 +37,14 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 
 const PORT = process.env.PORT || 5000;
 
+// Start the server
 app.listen(PORT, () => {
   console.log(`EasyCare server running on port ${PORT}`);
 });
 
+// Global error handler - catches any unhandled errors
 app.use((err, req, res, next) => {
   console.error(err.stack);
+  // Return generic error message to client (don't leak sensitive info)
   res.status(500).json({ message: "Server error" });
 });

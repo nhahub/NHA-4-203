@@ -22,7 +22,7 @@ export default function Register() {
       // Redirect based on role
       if (user.role === 'admin') navigate('/admin/dashboard');
       else if (user.role === 'doctor') navigate('/doctor/dashboard');
-      else navigate('/patient/dashboard');
+      else navigate('/');
     } catch (err) {
       setError(
         err.response?.data?.message || 'Registration failed. Please try again.'

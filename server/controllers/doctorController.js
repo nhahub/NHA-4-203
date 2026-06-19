@@ -1,5 +1,8 @@
 const Doctor = require('../models/Doctor');
 const User   = require('../models/User');
+const Appointment = require('../models/Appointment');
+const Review = require('../models/Review');
+const LabResult = require('../models/LabResult');
 
 // POST /api/doctors (doctor only)
 const createDoctor = async (req, res) => {
@@ -27,13 +30,14 @@ const createDoctor = async (req, res) => {
 };
 
 // GET /api/doctors  — supports ?search= (by name) &specialty= &limit=
+// This is the main doctor discovery endpoint - used by patients to find doctors
 const getDoctors = async (req, res) => {
   try {
     const { search, specialty, limit } = req.query;
 
     const doctorFilter = {};
 
-    // Specialty filter from dropdown (exact, case-insensitive)
+    // Specialty filter - exact match but case-insensitive (Cardiology, cardiology, CARDIOLOGY all work)
     if (specialty) {
       doctorFilter.specialty = { $regex: new RegExp(`^${specialty}$`, 'i') };
     }
@@ -46,10 +50,13 @@ const getDoctors = async (req, res) => {
       doctorFilter.userId = { $in: userIds };
     }
 
+    // Build query with populated user data (name, email from User collection)
     let query = Doctor.find(doctorFilter).populate('userId', 'name email');
 
+    // Apply pagination limit if specified
     if (limit) query = query.limit(parseInt(limit));
 
+    // Execute query and return results
     const doctors = await query;
 
     res.status(200).json(doctors);
@@ -121,4 +128,119 @@ const updateDoctorProfile = async (req, res) => {
   }
 };
 
-module.exports = { createDoctor, getDoctors, getNearbyDoctors, getDoctorById, updateDoctorProfile };
+// GET /api/doctors/me/profile (doctor only)
+const getMyDoctorProfile = async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ userId: req.user._id }).populate('userId', 'name email profilePicture');
+    if (!doctor) {
+      return res.status(404).json({ message: 'Doctor profile not found' });
+    }
+    res.status(200).json(doctor);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// GET /api/doctors/me/analytics (doctor only)
+const getDoctorAnalytics = async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({ userId: req.user._id });
+    if (!doctor) {
+      return res.status(404).json({ message: 'Doctor profile not found' });
+    }
+
+    const days = parseInt(req.query.days, 10) || 30;
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const [appointments, reviews, labResults] = await Promise.all([
+      Appointment.find({ doctorId: doctor._id }).populate('patientId', 'name'),
+      Review.find({ doctorId: doctor._id, isApproved: true }).populate('patientId', 'name profilePicture'),
+      LabResult.find({ doctorId: doctor._id }),
+    ]);
+
+    const recentAppointments = appointments.filter(
+      (a) => new Date(a.createdAt) >= since
+    );
+
+    const total = appointments.length;
+    const completed = appointments.filter((a) => a.status === 'completed').length;
+    const cancelled = appointments.filter((a) => a.status === 'cancelled').length;
+    const pending = appointments.filter((a) => a.status === 'pending').length;
+    const confirmed = appointments.filter((a) => a.status === 'confirmed').length;
+    const completionRate = total > 0 ? Math.round((completed / total) * 1000) / 10 : 0;
+
+    const uniquePatients = new Set(appointments.map((a) => a.patientId?._id?.toString()).filter(Boolean));
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const trendMap = {};
+    const now = new Date();
+    for (let i = 7; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      trendMap[key] = { month: monthNames[d.getMonth()], current: 0, previous: 0 };
+    }
+
+    appointments.forEach((a) => {
+      const d = new Date(a.createdAt);
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      const prevKey = `${d.getFullYear() - 1}-${d.getMonth()}`;
+      if (trendMap[key]) trendMap[key].current += 1;
+      if (trendMap[prevKey]) trendMap[prevKey].previous += 1;
+    });
+
+    const ratingDistribution = [5, 4, 3, 2, 1].map((stars) => ({
+      stars,
+      count: reviews.filter((r) => r.rating === stars).length,
+    }));
+
+    const pendingLabResults = labResults.filter((r) => r.status === 'pending').length;
+
+    res.status(200).json({
+      summary: {
+        totalAppointments: total,
+        recentAppointments: recentAppointments.length,
+        completionRate,
+        completed,
+        cancelled,
+        pending,
+        confirmed,
+        totalPatients: uniquePatients.size,
+        avgRating: doctor.rating || 0,
+        reviewsCount: doctor.reviewsCount || reviews.length,
+        pendingLabResults,
+      },
+      visitStatus: {
+        completed,
+        rescheduled: confirmed + pending,
+        cancelled,
+        total: total || 1,
+      },
+      appointmentTrend: Object.values(trendMap),
+      ratingDistribution,
+      recentReviews: reviews
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5)
+        .map((r) => ({
+          _id: r._id,
+          rating: r.rating,
+          comment: r.comment,
+          createdAt: r.createdAt,
+          patientName: r.patientId?.name || 'Patient',
+          patientPicture: r.patientId?.profilePicture || '',
+        })),
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = {
+  createDoctor,
+  getDoctors,
+  getNearbyDoctors,
+  getDoctorById,
+  updateDoctorProfile,
+  getMyDoctorProfile,
+  getDoctorAnalytics,
+};

@@ -23,6 +23,11 @@ const labResultSchema = new mongoose.Schema({
   fileUrl: {
     type: String,
   },
+  status: {
+    type: String,
+    enum: ['pending', 'reviewed', 'urgent'],
+    default: 'pending',
+  },
   uploadedAt: {
     type: Date,
     default: Date.now,

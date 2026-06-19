@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import './AppointmentCard.css';
 
 export default function AppointmentCard({ appointment, role, onStatusUpdate }) {
@@ -8,6 +9,7 @@ export default function AppointmentCard({ appointment, role, onStatusUpdate }) {
     status = 'pending',
     notes,
     createdAt,
+    bookingId,
   } = appointment;
 
   // Determine display name based on role
@@ -30,14 +32,19 @@ export default function AppointmentCard({ appointment, role, onStatusUpdate }) {
     .slice(0, 2);
 
   // Format date
-  const formattedDate = createdAt
-    ? new Date(createdAt).toLocaleDateString('en-US', {
+  const dateObj = bookingId?.bookedAt || createdAt;
+  const formattedDate = dateObj
+    ? new Date(dateObj).toLocaleDateString('en-US', {
         weekday: 'short',
         year: 'numeric',
         month: 'short',
         day: 'numeric',
       })
     : 'Date not set';
+
+  const timeStr = bookingId?.slotId
+    ? `${bookingId.slotId.startTime} - ${bookingId.slotId.endTime}`
+    : '';
 
   return (
     <div className={`appointment-card status-${status}`}>
@@ -50,7 +57,7 @@ export default function AppointmentCard({ appointment, role, onStatusUpdate }) {
         {subtitle && <p className="appointment-card-specialty">{subtitle}</p>}
         <p className="appointment-card-date">
           <span className="material-symbols-outlined">calendar_today</span>
-          {formattedDate}
+          {formattedDate} {timeStr && `• ${timeStr}`}
         </p>
         {notes && <p className="appointment-card-notes">"{notes}"</p>}
       </div>
@@ -70,6 +77,15 @@ export default function AppointmentCard({ appointment, role, onStatusUpdate }) {
                 <span className="material-symbols-outlined">check_circle</span>
                 Confirm
               </button>
+            )}
+            {status === 'confirmed' && (
+              <Link
+                className="appointment-action-btn diagnosis-btn"
+                to={`/doctor/diagnosis?appointmentId=${_id}&patientId=${patientId?._id || patientId}`}
+              >
+                <span className="material-symbols-outlined">edit_document</span>
+                Write Diagnosis
+              </Link>
             )}
             {(status === 'pending' || status === 'confirmed') && (
               <button

@@ -3,15 +3,19 @@ const Booking = require('../models/Booking');
 const Appointment = require('../models/Appointment');
 
 // POST /api/bookings (patient only)
+// When a patient selects a time slot, this creates the booking and appointment
 const createBooking = async (req, res) => {
   try {
     const { slotId, doctorId } = req.body;
 
+    // Check that the slot exists
     const slot = await Slot.findById(slotId);
     if (!slot) {
       return res.status(404).json({ message: 'Slot not found' });
     }
 
+    // Make sure the slot isn't already taken by another patient
+    // TODO: Add MongoDB transaction here - currently there's a race condition if two requests come simultaneously
     if (slot.isBooked) {
       return res.status(400).json({ message: 'Slot is already booked' });
     }

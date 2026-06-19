@@ -6,11 +6,11 @@
   padding: 12px 24px;
   background-color: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--outline-variant, #c1c7d3);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   font-family: 'Manrope', sans-serif;
 }
 
@@ -27,40 +27,42 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #475569;
+  color: var(--color-secondary-text, #6b7280);
   padding: 4px;
 }
 
 .doctor-search-bar {
   position: relative;
   width: 100%;
+  margin: 0;
 }
 
 .doctor-search-bar .material-symbols-outlined {
   position: absolute;
-  left: 12px;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: #94a3b8;
+  color: var(--color-secondary-text, #6b7280);
   font-size: 20px;
 }
 
 .doctor-search-bar input {
   width: 100%;
-  padding: 8px 16px 8px 40px;
-  background-color: #f8fafc;
-  border: none;
+  padding: 10px 16px 10px 44px;
+  background-color: var(--surface-container-low, #f2f3fb);
+  border: 1px solid transparent;
   border-radius: 9999px;
   font-size: 14px;
-  color: #0f172a;
-  transition: all 0.2s;
+  color: var(--on-surface, #181c21);
+  transition: all 0.2s ease;
   font-family: 'Manrope', sans-serif;
 }
 
 .doctor-search-bar input:focus {
   outline: none;
-  background-color: #ffffff;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
+  background-color: var(--surface, #ffffff);
+  border-color: var(--primary, #005596);
+  box-shadow: 0 0 0 4px var(--primary-fixed, #d3e4ff);
 }
 
 .doctor-header-right {
@@ -75,26 +77,27 @@
   border-radius: 50%;
   background: transparent;
   border: none;
-  color: #64748b;
+  color: var(--color-secondary-text, #6b7280);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 
 .doctor-header-icon-btn:hover {
-  background-color: #f8fafc;
+  background-color: var(--surface-container-low, #f2f3fb);
+  color: var(--primary, #005596);
 }
 
 .doctor-header-icon-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.92);
 }
 
 .doctor-header-divider {
   width: 1px;
   height: 32px;
-  background-color: #e2e8f0;
+  background-color: var(--outline-variant, #c1c7d3);
   margin: 0 8px;
 }
 
@@ -112,15 +115,16 @@
 .doctor-profile-name {
   font-size: 14px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--on-surface, #181c21);
   margin: 0;
-  line-height: 1;
+  line-height: 1.2;
 }
 
 .doctor-profile-role {
   font-size: 11px;
-  color: #64748b;
-  margin: 4px 0 0 0;
+  font-weight: 500;
+  color: var(--color-secondary-text, #6b7280);
+  margin: 2px 0 0 0;
 }
 
 .doctor-profile-avatar-img {
@@ -128,23 +132,23 @@
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  border: 2px solid var(--surface, #ffffff);
 }
 
 .doctor-profile-avatar-fallback {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #005596;
-  color: white;
+  background-color: var(--primary, #005596);
+  color: var(--on-primary, #ffffff);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 16px;
   font-weight: 700;
-  border: 2px solid white;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 2px solid var(--surface, #ffffff);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
 @media (max-width: 1024px) {

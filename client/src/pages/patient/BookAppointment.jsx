@@ -45,7 +45,7 @@ export default function BookAppointment() {
     try {
       await createBooking({ doctorId, slotId: selectedSlot._id || selectedSlot, notes });
       setSuccess('Appointment booked successfully!');
-      setTimeout(() => navigate('/patient/dashboard'), 2000);
+      setTimeout(() => navigate('/'), 2000);
     } catch (err) {
       setError(err.response?.data?.message || 'Booking failed.');
     } finally {
@@ -92,8 +92,8 @@ export default function BookAppointment() {
                         className={`book-slot-btn${isSelected ? ' selected' : ''}`}
                         onClick={() => setSelectedSlot(slot)}
                       >
-                        {new Date(slot.date || slot.startTime).toLocaleDateString()}{' '}
-                        {slot.time || ''}
+                        <span className="material-symbols-outlined" style={{ fontSize: '16px', marginRight: '4px', verticalAlign: 'middle' }}>schedule</span>
+                        {slot.startTime} - {slot.endTime}
                       </button>
                     );
                   })}
