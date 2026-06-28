@@ -6,8 +6,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EasyCare — Your Health, Simplified</title>
     <meta name="description" content="Find doctors, book appointments, and manage your health records — all in one place." />
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#f8f9ff",
+                        "secondary-fixed": "#5ffbd6",
+                        "surface-container-highest": "#e0e2e9",
+                        "background": "#F4F7FB",
+                        "outline": "#717782",
+                        "inverse-primary": "#a1c9ff",
+                        "on-error": "#ffffff",
+                        "warning": "#F59E0B",
+                        "tertiary-container": "#aa5400",
+                        "inverse-on-surface": "#eff0f8",
+                        "surface-tint": "#0060a8",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "on-surface": "#181c21",
+                        "on-primary-fixed-variant": "#004880",
+                        "surface": "#FFFFFF",
+                        "primary-container": "#0a6ebd",
+                        "danger": "#EF4444",
+                        "surface-container-low": "#f2f3fb",
+                        "on-secondary-container": "#00725e",
+                        "inverse-surface": "#2d3136",
+                        "on-primary-container": "#e6eeff",
+                        "secondary-container": "#5ffbd6",
+                        "on-secondary-fixed-variant": "#005142",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "error-container": "#ffdad6",
+                        "surface-dim": "#d8dae1",
+                        "secondary": "#006b58",
+                        "on-secondary-fixed": "#002019",
+                        "on-primary-fixed": "#001c38",
+                        "on-surface-variant": "#414751",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "admin-sidebar": "#1A1F36",
+                        "text-primary": "#1A1F36",
+                        "tertiary-fixed": "#ffdcc6",
+                        "primary-fixed-dim": "#a1c9ff",
+                        "on-tertiary-container": "#ffeadf",
+                        "primary-fixed": "#d3e4ff",
+                        "primary": "#005596",
+                        "surface-container-high": "#e6e8ef",
+                        "secondary-fixed-dim": "#38debb",
+                        "text-secondary": "#6B7280",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed": "#311300",
+                        "on-secondary": "#ffffff",
+                        "surface-container": "#eceef5",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#854100",
+                        "on-background": "#181c21",
+                        "surface-variant": "#e0e2e9",
+                        "outline-variant": "#c1c7d3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "card-inner-padding": "1.5rem",
+                        "sidebar-width": "260px",
+                        "section-gap": "3rem",
+                        "gutter": "1.5rem",
+                        "container-padding": "2rem"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "body-md": ["Manrope"],
+                        "label-md": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "body-lg": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", {"lineHeight": "1.4", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F4F7FB;
+            font-family: 'Manrope', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
   </head>
   <body>
     <div id="root"></div>

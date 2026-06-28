@@ -4,74 +4,74 @@ const path = require('path');
 const mappings = [
   // Patient Pages
   {
-    src: '../../easycare-uiux/easycare-uiux/patient/patient_dashboard_top_nav/code.html',
+    src: '../easycare-uiux/easycare-uiux/patient/patient_dashboard_top_nav/code.html',
     dest: 'client/src/pages/patient/Dashboard.jsx',
     name: 'Dashboard'
   },
   {
-    src: '../../easycare-uiux/easycare-uiux/patient/book_appointment_top_nav/code.html',
+    src: '../easycare-uiux/easycare-uiux/patient/book_appointment_top_nav/code.html',
     dest: 'client/src/pages/patient/BookAppointment.jsx',
     name: 'BookAppointment'
   },
   {
-    src: '../../easycare-uiux/easycare-uiux/patient/my_appointments_top_nav/code.html',
+    src: '../easycare-uiux/easycare-uiux/patient/my_appointments_top_nav/code.html',
     dest: 'client/src/pages/patient/MyAppointments.jsx',
     name: 'MyAppointments'
   },
   {
-    src: '../../easycare-uiux/easycare-uiux/patient/medical_records/code.html',
+    src: '../easycare-uiux/easycare-uiux/patient/medical_records/code.html',
     dest: 'client/src/pages/patient/MedicalRecords.jsx',
     name: 'MedicalRecords'
   },
   {
-    src: '../../easycare-uiux/easycare-uiux/patient/upload_results_unified_nav/code.html',
+    src: '../easycare-uiux/easycare-uiux/patient/upload_results_unified_nav/code.html',
     dest: 'client/src/pages/patient/UploadResults.jsx',
     name: 'UploadResults'
   },
   {
-    src: '../../easycare-uiux/easycare-uiux/patient/map_search_page_unified_nav/code.html',
+    src: '../easycare-uiux/easycare-uiux/patient/map_search_page_unified_nav/code.html',
     dest: 'client/src/pages/patient/MapSearch.jsx',
     name: 'MapSearch'
   },
   {
-    src: '../../easycare-uiux/easycare-uiux/patient/find_doctors_map_unified_nav/code.html',
+    src: '../easycare-uiux/easycare-uiux/patient/find_doctors_map_unified_nav/code.html',
     dest: 'client/src/pages/patient/Doctors.jsx',
     name: 'Doctors'
   },
 
   // Doctor Pages
   {
-    src: '../../easycare-uiux/easycare-uiux/doctor/doctor_dashboard_1/code.html',
+    src: '../easycare-uiux/easycare-uiux/doctor/doctor_dashboard_1/code.html',
     dest: 'client/src/pages/doctor/DoctorDashboard.jsx',
     name: 'DoctorDashboard'
   },
   {
-    src: '../../easycare-uiux/easycare-uiux/doctor/doctor_appointments/code.html',
+    src: '../easycare-uiux/easycare-uiux/doctor/doctor_appointments/code.html',
     dest: 'client/src/pages/doctor/DoctorAppointments.jsx',
     name: 'DoctorAppointments'
   },
   {
-    src: '../../easycare-uiux/easycare-uiux/doctor/patient_records_1/code.html',
+    src: '../easycare-uiux/easycare-uiux/doctor/patient_records_1/code.html',
     dest: 'client/src/pages/doctor/DoctorPatientRecords.jsx',
     name: 'DoctorPatientRecords'
   },
   {
-    src: '../../easycare-uiux/easycare-uiux/doctor/lab_results_review_1/code.html',
+    src: '../easycare-uiux/easycare-uiux/doctor/lab_results_review_1/code.html',
     dest: 'client/src/pages/doctor/DoctorResults.jsx',
     name: 'DoctorResults'
   },
   {
-    src: '../../easycare-uiux/easycare-uiux/doctor/add_diagnosis/code.html',
+    src: '../easycare-uiux/easycare-uiux/doctor/add_diagnosis/code.html',
     dest: 'client/src/pages/doctor/DoctorDiagnosis.jsx',
     name: 'DoctorDiagnosis'
   },
   {
-    src: '../../easycare-uiux/easycare-uiux/doctor/doctor_statistics/code.html',
+    src: '../easycare-uiux/easycare-uiux/doctor/doctor_statistics/code.html',
     dest: 'client/src/pages/doctor/DoctorStats.jsx',
     name: 'DoctorStats'
   },
   {
-    src: '../../easycare-uiux/easycare-uiux/doctor/doctor_profile/code.html',
+    src: '../easycare-uiux/easycare-uiux/doctor/doctor_profile/code.html',
     dest: 'client/src/pages/patient/DoctorProfile.jsx',
     name: 'DoctorProfile'
   }
