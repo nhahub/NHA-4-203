@@ -53,7 +53,7 @@ function MapResizeHandler() {
   const map = useMap();
   useEffect(() => {
     map.invalidateSize();
-    
+
     const onResize = () => {
       map.invalidateSize();
     };
@@ -92,9 +92,9 @@ function getDistanceKm(lat1, lon1, lat2, lon2) {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
@@ -104,7 +104,7 @@ export default function MapSearch() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  
+
   // Location & Filter States
   const [centerLoc, setCenterLoc] = useState(DEFAULT_CENTER);
   const [userLoc, setUserLoc] = useState(null);
@@ -197,7 +197,7 @@ export default function MapSearch() {
       <Navbar />
 
       <div className="map-layout-container">
-        
+
         {/* Interactive Map Canvas */}
         <div className="map-canvas-container">
           <MapContainer
@@ -287,7 +287,7 @@ export default function MapSearch() {
                 Specialty
               </label>
               <div className="select-dropdown-wrapper">
-                <select 
+                <select
                   className="filter-select"
                   value={specialty}
                   onChange={(e) => setSpecialty(e.target.value)}
@@ -313,7 +313,7 @@ export default function MapSearch() {
                 </label>
                 <span className="slider-value-tag">{maxDistance} km</span>
               </div>
-              <input 
+              <input
                 type="range"
                 className="distance-range-slider"
                 min="1"
@@ -334,19 +334,19 @@ export default function MapSearch() {
                 Minimum Rating
               </label>
               <div className="rating-chips-container">
-                <button 
+                <button
                   className={`rating-chip-btn ${minRating === '4.5' ? 'active' : ''}`}
                   onClick={() => setMinRating('4.5')}
                 >
                   4.5+
                 </button>
-                <button 
+                <button
                   className={`rating-chip-btn ${minRating === '4.0' ? 'active' : ''}`}
                   onClick={() => setMinRating('4.0')}
                 >
                   4.0+
                 </button>
-                <button 
+                <button
                   className={`rating-chip-btn ${minRating === 'any' ? 'active' : ''}`}
                   onClick={() => setMinRating('any')}
                 >
@@ -362,7 +362,7 @@ export default function MapSearch() {
                 <span className="toggle-label-text">Available Today</span>
               </div>
               <label className="switch-toggle-btn">
-                <input 
+                <input
                   type="checkbox"
                   checked={availableToday}
                   onChange={(e) => setAvailableToday(e.target.checked)}
@@ -384,9 +384,9 @@ export default function MapSearch() {
           {/* Floating Search Input */}
           <div className="floating-search-bar-card">
             <span className="material-symbols-outlined search-icon-grey">search</span>
-            <input 
-              type="text" 
-              placeholder="Search by name or clinic..." 
+            <input
+              type="text"
+              placeholder="Search by name or clinic..."
               className="floating-search-input"
               value={search}
               onChange={(e) => setSearch(e.target.value)}

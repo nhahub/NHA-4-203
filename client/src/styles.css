@@ -95,7 +95,8 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-y: scroll; /* Prevents layout shift from scrollbar appearing/disappearing */
+  overflow-y: scroll;
+  /* Prevents layout shift from scrollbar appearing/disappearing */
 }
 
 body {
