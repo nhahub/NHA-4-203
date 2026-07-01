@@ -4,6 +4,7 @@ import useAuth from '../hooks/useAuth';
 import { isStaffRole } from '../utils/roleRoutes';
 import { scrollToTop } from './ScrollToTop';
 import LogoutModal from './LogoutModal';
+import NotificationDropdown from './NotificationDropdown';
 import './Navbar.css';
 
 export default function Navbar() {
@@ -96,10 +97,7 @@ export default function Navbar() {
     return (
       <div className="navbar-actions-container">
         <div className="navbar-icon-group">
-          <button className="navbar-icon-btn" type="button">
-            <span className="material-symbols-outlined">notifications</span>
-            <span className="navbar-notification-dot" />
-          </button>
+          <NotificationDropdown />
           <button className="navbar-icon-btn" type="button" onClick={handleSettingsClick}>
             <span className="material-symbols-outlined">settings</span>
           </button>

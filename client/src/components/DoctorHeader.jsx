@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
+import NotificationDropdown from './NotificationDropdown';
 import './DoctorHeader.css';
 
 const API_BASE = 'http://localhost:5000';
@@ -47,13 +48,7 @@ export default function DoctorHeader({ onMenuClick }) {
       </div>
 
       <div className="doctor-header-right">
-        <button
-          className="doctor-header-icon-btn"
-          onClick={() => navigate('/doctor/results')}
-          title="Pending lab results"
-        >
-          <span className="material-symbols-outlined">notifications</span>
-        </button>
+        <NotificationDropdown />
         <button
           className="doctor-header-icon-btn"
           onClick={() => navigate('/doctor/settings')}

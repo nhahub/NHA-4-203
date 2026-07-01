@@ -72,7 +72,7 @@ export default function Dashboard() {
   return (
     <div className="dashboard-page">
       <Navbar />
-      
+
       <main className="dashboard-main">
         {/* Welcome Section */}
         <div className="dashboard-welcome">
@@ -126,7 +126,7 @@ export default function Dashboard() {
           <div className="error-message">{error}</div>
         ) : (
           <div className="dashboard-content-layout">
-            
+
             {/* Left Column: Upcoming Appointments */}
             <div className="dashboard-section-column">
               <div className="section-header-row">
@@ -172,7 +172,7 @@ export default function Dashboard() {
                             </div>
                           </div>
                         </div>
-                        <button 
+                        <button
                           className="appointment-action-btn"
                           onClick={() => navigate('/patient/appointments')}
                         >
@@ -235,7 +235,7 @@ export default function Dashboard() {
                               </p>
                             </td>
                             <td className="text-right">
-                              <button 
+                              <button
                                 className="table-download-btn"
                                 onClick={() => navigate('/patient/records')}
                                 title="View Record Details"

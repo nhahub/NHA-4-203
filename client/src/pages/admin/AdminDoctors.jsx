@@ -211,7 +211,7 @@ export default function AdminDoctors() {
     const nameMatch = doc.userId?.name?.toLowerCase().includes(searchQuery.toLowerCase());
     const specMatch = doc.specialty?.toLowerCase().includes(searchQuery.toLowerCase());
     const searchMatch = nameMatch || specMatch;
-    
+
     if (activeTab === 'On-Duty') {
       return searchMatch && doc.isActive;
     }
@@ -228,7 +228,7 @@ export default function AdminDoctors() {
   // Dynamic statistics
   const activeDoctorsCount = doctors.filter(doc => doc.isActive).length;
   const pendingVerificationCount = doctors.filter(doc => !doc.isVerified).length;
-  const averageRating = doctors.length > 0 
+  const averageRating = doctors.length > 0
     ? (doctors.reduce((acc, doc) => acc + (doc.rating || 0), 0) / doctors.length).toFixed(2)
     : '0.00';
 
@@ -268,7 +268,7 @@ export default function AdminDoctors() {
           <div className="doctors-stats-grid">
             <div className="doctors-stat-card">
               <div className="stat-icon-square bg-primary-light color-primary-text">
-                <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>person_search</span>
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>person_search</span>
               </div>
               <div>
                 <p className="stat-label">TOTAL DOCTORS</p>
@@ -277,7 +277,7 @@ export default function AdminDoctors() {
             </div>
             <div className="doctors-stat-card">
               <div className="stat-icon-square bg-secondary-light color-secondary-text">
-                <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>verified</span>
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
               </div>
               <div>
                 <p className="stat-label">ACTIVE STATUS</p>
@@ -286,7 +286,7 @@ export default function AdminDoctors() {
             </div>
             <div className="doctors-stat-card">
               <div className="stat-icon-square bg-warning-light color-warning-text">
-                <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>pending_actions</span>
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>pending_actions</span>
               </div>
               <div>
                 <p className="stat-label">PENDING APPROVAL</p>
@@ -295,7 +295,7 @@ export default function AdminDoctors() {
             </div>
             <div className="doctors-stat-card">
               <div className="stat-icon-square bg-tertiary-light color-tertiary-text">
-                <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
               </div>
               <div>
                 <p className="stat-label">AVG RATING</p>
@@ -308,13 +308,13 @@ export default function AdminDoctors() {
           <div className="doctors-table-container">
             <div className="doctors-table-header">
               <div className="table-tabs">
-                <button 
+                <button
                   className={`tab-btn ${activeTab === 'All' ? 'active' : ''}`}
                   onClick={() => { setActiveTab('All'); setCurrentPage(1); }}
                 >
                   All Specialties
                 </button>
-                <button 
+                <button
                   className={`tab-btn ${activeTab === 'On-Duty' ? 'active' : ''}`}
                   onClick={() => { setActiveTab('On-Duty'); setCurrentPage(1); }}
                 >
@@ -456,8 +456,8 @@ export default function AdminDoctors() {
       </div>
 
       {/* Side Drawer for Doctor Details */}
-      <div 
-        className={`drawer-overlay ${selectedDoctor ? 'open' : ''}`} 
+      <div
+        className={`drawer-overlay ${selectedDoctor ? 'open' : ''}`}
         onClick={() => setSelectedDoctor(null)}
       ></div>
       <div className={`side-drawer ${selectedDoctor ? 'open' : ''}`}>

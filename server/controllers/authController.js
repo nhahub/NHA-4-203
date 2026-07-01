@@ -196,5 +196,78 @@ const changePassword = async (req, res) => {
   }
 };
 
-module.exports = { register, login, forgotPassword, resetPassword, changePassword };
+// POST /api/auth/google
+const { OAuth2Client } = require('google-auth-library');
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ message: 'Google credential is required' });
+    }
+
+    // Verify the Google ID token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    // Check if user already exists (by googleId or email)
+    let user = await User.findOne({ $or: [{ googleId }, { email }] });
+
+    if (user) {
+      // Link googleId if user exists by email but hasn't linked Google yet
+      if (!user.googleId) {
+        user.googleId = googleId;
+        if (picture && !user.profilePicture) {
+          user.profilePicture = picture;
+        }
+        await user.save();
+      }
+    } else {
+      // Create a new user with a random secure password
+      const randomPassword = crypto.randomBytes(32).toString('hex');
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(randomPassword, salt);
+
+      user = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+        googleId,
+        role: 'patient', // Default role for Google sign-ups
+        profilePicture: picture || '',
+      });
+    }
+
+    // Generate JWT
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.status(200).json({
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        profilePicture: user.profilePicture,
+      },
+    });
+  } catch (error) {
+    console.error('Google login error:', error);
+    res.status(401).json({ message: 'Google authentication failed', error: error.message });
+  }
+};
+
+module.exports = { register, login, forgotPassword, resetPassword, changePassword, googleLogin };
 

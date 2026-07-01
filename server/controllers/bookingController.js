@@ -1,6 +1,8 @@
+const Notification = require('../models/Notification');
 const Slot = require('../models/Slot');
 const Booking = require('../models/Booking');
 const Appointment = require('../models/Appointment');
+const User = require('../models/User'); // Need User to get patient name for notification
 
 // POST /api/bookings (patient only)
 // When a patient selects a time slot, this creates the booking and appointment
@@ -34,6 +36,17 @@ const createBooking = async (req, res) => {
       patientId: req.user._id,
       doctorId,
       status: 'pending',
+    });
+
+    // --- TRIGGER NOTIFICATION ---
+    // Notify the doctor about the new appointment
+    const patientUser = await User.findById(req.user._id);
+    await Notification.create({
+      user: doctorId,
+      title: 'New Appointment Booked',
+      message: `${patientUser.name} has booked a new appointment.`,
+      type: 'appointment',
+      relatedId: appointment._id
     });
 
     res.status(201).json({ booking, appointment });

@@ -21,7 +21,7 @@ export default function Doctors() {
   const [selectedSpecialty, setSelectedSpecialty] = useState(searchParams.get('specialty') || 'All');
   const [cityFilter, setCityFilter] = useState('');
   const [ratingFilter, setRatingFilter] = useState('All');
-  
+
   // Pagination
   const [visibleCount, setVisibleCount] = useState(8);
 
@@ -37,7 +37,7 @@ export default function Doctors() {
         const params = {};
         if (searchQuery) params.search = searchQuery;
         if (selectedSpecialty && selectedSpecialty !== 'All') params.specialty = selectedSpecialty;
-        
+
         const { data } = await getDoctors(params);
         const docsData = data.doctors || data || [];
         setDoctors(docsData);
@@ -58,7 +58,7 @@ export default function Doctors() {
     // Filter by city / clinic
     if (cityFilter.trim() !== '') {
       const cityLower = cityFilter.toLowerCase();
-      result = result.filter(doc => 
+      result = result.filter(doc =>
         doc.clinic && doc.clinic.toLowerCase().includes(cityLower)
       );
     }
@@ -98,13 +98,13 @@ export default function Doctors() {
         {/* Premium Unified Search Bar */}
         <section className="search-bar-section">
           <form className="search-bar-glass-card" onSubmit={handleSearchSubmit}>
-            
+
             {/* Input Name / Clinic */}
             <div className="search-input-wrapper name-search">
               <span className="material-symbols-outlined search-icon">search</span>
-              <input 
-                type="text" 
-                placeholder="Search doctor name..." 
+              <input
+                type="text"
+                placeholder="Search doctor name..."
                 className="search-inner-input"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -114,7 +114,7 @@ export default function Doctors() {
             {/* Dropdown Specialty */}
             <div className="search-input-wrapper select-specialty">
               <span className="material-symbols-outlined input-icon text-blue">medical_services</span>
-              <select 
+              <select
                 className="search-inner-select"
                 value={selectedSpecialty}
                 onChange={(e) => setSelectedSpecialty(e.target.value)}
@@ -130,9 +130,9 @@ export default function Doctors() {
             {/* Input City */}
             <div className="search-input-wrapper input-city">
               <span className="material-symbols-outlined input-icon text-blue">location_on</span>
-              <input 
-                type="text" 
-                placeholder="City / Clinic location" 
+              <input
+                type="text"
+                placeholder="City / Clinic location"
                 className="search-inner-input"
                 value={cityFilter}
                 onChange={(e) => setCityFilter(e.target.value)}
@@ -142,7 +142,7 @@ export default function Doctors() {
             {/* Dropdown Rating */}
             <div className="search-input-wrapper select-rating">
               <span className="material-symbols-outlined input-icon text-orange">star</span>
-              <select 
+              <select
                 className="search-inner-select"
                 value={ratingFilter}
                 onChange={(e) => setRatingFilter(e.target.value)}
@@ -155,17 +155,13 @@ export default function Doctors() {
 
             {/* Action Buttons */}
             <div className="search-buttons-group">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="action-btn-map"
                 onClick={() => navigate('/patient/map')}
               >
                 <span className="material-symbols-outlined">map</span>
                 View Map
-              </button>
-              <button type="submit" className="action-btn-search">
-                <span className="material-symbols-outlined">tune</span>
-                Filter
               </button>
             </div>
 
@@ -203,7 +199,12 @@ export default function Doctors() {
                 const isVerified = doc.isVerified;
 
                 return (
-                  <div key={doc._id} className="doctor-premium-card hover-lift">
+                  <div
+                    key={doc._id}
+                    className="doctor-premium-card hover-lift"
+                    onClick={() => navigate(`/doctors/${doc._id}`)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <div className="card-top-header">
                       <div className="avatar-badge-container">
                         {avatar ? (
@@ -240,15 +241,21 @@ export default function Doctors() {
                     </div>
 
                     <div className="card-footer-actions">
-                      <button 
+                      <button
                         className="btn-book-primary"
-                        onClick={() => navigate(`/patient/book/${doc._id}`)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/patient/book/${doc._id}`);
+                        }}
                       >
                         Book Appointment
                       </button>
-                      <button 
+                      <button
                         className="btn-view-secondary"
-                        onClick={() => navigate(`/doctors/${doc._id}`)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/doctors/${doc._id}`);
+                        }}
                       >
                         View Profile
                       </button>

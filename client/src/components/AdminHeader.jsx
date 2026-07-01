@@ -1,3 +1,4 @@
+import NotificationDropdown from './NotificationDropdown';
 import useAuth from '../hooks/useAuth';
 import './AdminHeader.css';
 
@@ -14,10 +15,7 @@ export default function AdminHeader({ onMenuClick }) {
         </button>
       </div>
       <div className="admin-header-right">
-        <button className="admin-header-icon-btn">
-          <span className="material-symbols-outlined">notifications</span>
-          <span className="badge"></span>
-        </button>
+        <NotificationDropdown />
         <button className="admin-header-icon-btn">
           <span className="material-symbols-outlined">help_outline</span>
         </button>

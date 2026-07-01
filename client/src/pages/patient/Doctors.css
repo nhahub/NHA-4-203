@@ -168,35 +168,6 @@
   background: var(--surface-variant);
 }
 
-.action-btn-search {
-  flex: 1;
-  height: 56px;
-  padding: 0 28px;
-  background: var(--primary);
-  color: var(--on-primary);
-  border: none;
-  border-radius: var(--radius-full);
-  font-size: 15px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: filter 0.2s;
-  box-shadow: 0 4px 15px rgba(10, 110, 189, 0.25);
-}
-
-.action-btn-search:hover {
-  filter: brightness(1.1);
-}
-
-@media (min-width: 1024px) {
-  .action-btn-search {
-    flex: none;
-  }
-}
 
 /* Quick Stats Row */
 .doctors-quick-stats-row {

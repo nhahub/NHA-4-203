@@ -4,6 +4,7 @@ import { getPatientRecords, getPrescriptions, getPatientResults } from '../../se
 import useAuth from '../../hooks/useAuth';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import { formatDoctorName } from '../../utils/roleRoutes';
 import './MedicalRecords.css';
 
 export default function MedicalRecords() {
@@ -269,7 +270,7 @@ export default function MedicalRecords() {
                         <div className="records-item-meta-row">
                           <span className="records-meta-item">
                             <span className="material-symbols-outlined">person</span>
-                            Dr. {rec.doctorId?.userId?.name || 'Doctor'}
+                            {formatDoctorName(rec.doctorId?.userId?.name)}
                           </span>
                           <span className="records-meta-item">
                             <span className="material-symbols-outlined">health_and_safety</span>

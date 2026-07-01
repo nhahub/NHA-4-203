@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getUserAppointments, updateAppointmentStatus } from '../../services/api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import { formatDoctorName } from '../../utils/roleRoutes';
 import './MyAppointments.css';
 
 export default function MyAppointments() {
@@ -170,7 +171,7 @@ export default function MyAppointments() {
                         )}
                       </div>
                       <div>
-                        <h3 className="appointment-card-doctor-name">Dr. {docName}</h3>
+                        <h3 className="appointment-card-doctor-name">{formatDoctorName(docName)}</h3>
                         <div className="appointment-card-specialty-row">
                           <span className="material-symbols-outlined">medical_services</span>
                           {docSpecialty}

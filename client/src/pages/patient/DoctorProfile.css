@@ -1,3 +1,7 @@
+/* ==========================================================================
+   EASYCARE PATIENT DOCTOR PROFILE & BOOKING LAYOUT STYLES
+   ========================================================================== */
+
 .doctor-profile-page {
   display: flex;
   flex-direction: column;
@@ -98,7 +102,7 @@
 @media (min-width: 768px) {
   .profile-avatar-row {
     flex-direction: row;
-    align-items: flex-end;
+    align-items: flex-start;
     text-align: left;
     margin-top: -96px;
   }
@@ -147,6 +151,12 @@
 
 .profile-text-details {
   flex: 1;
+}
+
+@media (min-width: 768px) {
+  .profile-text-details {
+    margin-top: 104px; /* Pushes the text down below the top of the white card */
+  }
 }
 
 .doctor-full-name {

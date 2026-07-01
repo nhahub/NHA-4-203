@@ -16,6 +16,7 @@ API.interceptors.request.use((config) => {
 // Auth
 export const register = (data) => API.post('/auth/register', data);
 export const login = (data) => API.post('/auth/login', data);
+export const googleLogin = (data) => API.post('/auth/google', data);
 export const forgotPassword = (data) => API.post('/auth/forgot-password', data);
 export const resetPassword = (data) => API.post('/auth/reset-password', data);
 export const changePassword = (data) => API.put('/auth/change-password', data);
@@ -77,6 +78,11 @@ export const createReview = (doctorId, data) =>
   API.post(`/reviews/${doctorId}`, data);
 export const getDoctorReviews = (doctorId) => API.get(`/reviews/${doctorId}`);
 export const deleteReview = (id) => API.delete(`/reviews/${id}`);
+
+// Notifications
+export const getNotifications = () => API.get('/notifications');
+export const markNotificationRead = (id) => API.patch(`/notifications/${id}/read`);
+export const markAllNotificationsRead = () => API.patch('/notifications/read-all');
 
 // Admin
 export const getAdminUsers = () => API.get('/admin/users');
