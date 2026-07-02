@@ -3,7 +3,7 @@ import AdminSidebar from '../../components/AdminSidebar';
 import AdminHeader from '../../components/AdminHeader';
 import AdminModal from '../../components/AdminModal';
 import Toast from '../../components/Toast';
-import { 
+import {
   getAdminAppointments,
   updateAdminAppointment,
   deleteAdminAppointment
@@ -17,16 +17,19 @@ export default function AdminAppointments() {
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
-  
+
   // Filters
   const [statusFilter, setStatusFilter] = useState('All Statuses');
-  
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [doctorFilter, setDoctorFilter] = useState('All Doctors');
+
   // Modal states
   const [statusModal, setStatusModal] = useState({ isOpen: false, appointment: null });
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, appointment: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newStatus, setNewStatus] = useState('');
-  
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -60,8 +63,8 @@ export default function AdminAppointments() {
     setIsSubmitting(true);
     try {
       await updateAdminAppointment(statusModal.appointment._id, { status: newStatus });
-      const updatedAppointments = appointments.map(a => 
-        a._id === statusModal.appointment._id 
+      const updatedAppointments = appointments.map(a =>
+        a._id === statusModal.appointment._id
           ? { ...a, status: newStatus }
           : a
       );
@@ -84,21 +87,25 @@ export default function AdminAppointments() {
       showToast('No appointments to export', 'error');
       return;
     }
-    
+
     const headers = ['ID', 'Patient Name', 'Doctor Name', 'Date', 'Time', 'Status', 'Booked On'];
     const csvRows = [
       headers.join(','),
-      ...appointments.map(app => [
-        app._id,
-        `"${app.patientId?.name || 'Unknown'}"`,
-        `"${app.doctorId?.userId?.name || 'Unknown'}"`,
-        new Date(app.date).toLocaleDateString(),
-        app.time,
-        app.status,
-        new Date(app.createdAt).toLocaleDateString()
-      ].join(','))
+      ...appointments.map(app => {
+        const slot = app.bookingId?.slotId;
+        const appointmentDate = app.bookingId?.bookedAt || app.createdAt;
+        return [
+          app._id,
+          `"${app.patientId?.name || 'Unknown'}"`,
+          `"${app.doctorId?.userId?.name || 'Unknown'}"`,
+          appointmentDate ? new Date(appointmentDate).toLocaleDateString() : 'N/A',
+          slot ? `${slot.startTime} - ${slot.endTime}` : 'N/A',
+          app.status,
+          new Date(app.createdAt).toLocaleDateString()
+        ].join(',');
+      })
     ];
-    
+
     const csvString = csvRows.join('\n');
     const blob = new Blob([csvString], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -126,10 +133,47 @@ export default function AdminAppointments() {
     }
   };
 
+  // Extract unique doctor names for the filter dropdown
+  const uniqueDoctors = [...new Set(
+    appointments
+      .map(app => app.doctorId?.userId?.name)
+      .filter(Boolean)
+  )];
+
+  // Helper to parse the bookedAt date for filtering
+  const getAppointmentDate = (app) => {
+    const bookedAt = app.bookingId?.bookedAt || app.createdAt;
+    if (!bookedAt) return null;
+    const d = new Date(bookedAt);
+    return isNaN(d.getTime()) ? null : d;
+  };
+
   // Filter logic
   const filteredAppointments = appointments.filter((app) => {
-    if (statusFilter === 'All Statuses') return true;
-    return app.status.toLowerCase() === statusFilter.toLowerCase();
+    // Status filter
+    if (statusFilter !== 'All Statuses' && app.status.toLowerCase() !== statusFilter.toLowerCase()) {
+      return false;
+    }
+    // Doctor filter
+    if (doctorFilter !== 'All Doctors' && app.doctorId?.userId?.name !== doctorFilter) {
+      return false;
+    }
+    // Date range filter
+    if (dateFrom || dateTo) {
+      const appDate = getAppointmentDate(app);
+      if (!appDate) return false;
+      if (dateFrom) {
+        const from = new Date(dateFrom);
+        from.setHours(0, 0, 0, 0);
+        if (appDate < from) return false;
+      }
+      if (dateTo) {
+        const to = new Date(dateTo);
+        to.setHours(23, 59, 59, 999);
+        if (appDate > to) return false;
+      }
+    }
+    return true;
   });
 
   const totalPages = Math.ceil(filteredAppointments.length / itemsPerPage);
@@ -151,8 +195,8 @@ export default function AdminAppointments() {
   return (
     <div className="admin-page-wrapper">
       {mobileMenuOpen && (
-        <div 
-          className="mobile-sidebar-backdrop" 
+        <div
+          className="mobile-sidebar-backdrop"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
@@ -160,7 +204,7 @@ export default function AdminAppointments() {
 
       <div className="admin-content">
         <AdminHeader onMenuClick={() => setMobileMenuOpen(true)} />
-        
+
         <main className="admin-main appointments-main">
           <div className="admin-container-lg">
             {/* Header Section */}
@@ -232,8 +276,8 @@ export default function AdminAppointments() {
               <div className="advanced-filters-bar">
                 <div className="filter-group">
                   <label>Status Filter</label>
-                  <select 
-                    value={statusFilter} 
+                  <select
+                    value={statusFilter}
                     onChange={(e) => {
                       setStatusFilter(e.target.value);
                       setCurrentPage(1);
@@ -247,21 +291,61 @@ export default function AdminAppointments() {
                   </select>
                 </div>
                 <div className="filter-group">
-                  <label>Date Range</label>
+                  <label>From Date</label>
                   <div className="input-with-icon">
                     <span className="material-symbols-outlined">calendar_month</span>
-                    <input type="text" placeholder="Select dates..." />
+                    <input
+                      type="date"
+                      value={dateFrom}
+                      onChange={(e) => {
+                        setDateFrom(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="filter-group">
+                  <label>To Date</label>
+                  <div className="input-with-icon">
+                    <span className="material-symbols-outlined">calendar_month</span>
+                    <input
+                      type="date"
+                      value={dateTo}
+                      onChange={(e) => {
+                        setDateTo(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                    />
                   </div>
                 </div>
                 <div className="filter-group">
                   <label>Doctor</label>
-                  <select>
+                  <select
+                    value={doctorFilter}
+                    onChange={(e) => {
+                      setDoctorFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  >
                     <option>All Doctors</option>
+                    {uniqueDoctors.map((name) => (
+                      <option key={name} value={name}>Dr. {name}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="filter-action">
-                  <button className="btn-icon-dark">
-                    <span className="material-symbols-outlined">filter_list</span>
+                  <button
+                    className="btn-icon-dark"
+                    title="Clear all filters"
+                    onClick={() => {
+                      setStatusFilter('All Statuses');
+                      setDateFrom('');
+                      setDateTo('');
+                      setDoctorFilter('All Doctors');
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <span className="material-symbols-outlined">filter_list_off</span>
                   </button>
                 </div>
               </div>
@@ -284,57 +368,65 @@ export default function AdminAppointments() {
                         <td colSpan="6"><PageLoader message="Loading appointments..." /></td>
                       </tr>
                     ) : currentAppointments.length > 0 ? (
-                      currentAppointments.map((app) => (
-                        <tr key={app._id}>
-                          <td>
-                            <div className="patient-cell">
-                              <div className="patient-avatar-sm bg-pale-blue color-primary-text">
-                                {app.patientId?.name?.charAt(0).toUpperCase() || 'P'}
+                      currentAppointments.map((app) => {
+                        const slot = app.bookingId?.slotId;
+                        const appointmentDate = app.bookingId?.bookedAt || app.createdAt;
+                        return (
+                          <tr key={app._id}>
+                            <td>
+                              <div className="patient-cell">
+                                <div className="patient-avatar-sm bg-pale-blue color-primary-text">
+                                  {app.patientId?.name?.charAt(0).toUpperCase() || 'P'}
+                                </div>
+                                <div>
+                                  <p className="patient-name">{app.patientId?.name || 'Unknown'}</p>
+                                  <p className="patient-id">#PAT-{app.patientId?._id?.substring(0, 4).toUpperCase() || '0000'}</p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="patient-name">{app.patientId?.name || 'Unknown'}</p>
-                                <p className="patient-id">#PAT-{app.patientId?._id?.substring(0, 4).toUpperCase() || '0000'}</p>
+                            </td>
+                            <td>
+                              <div className="doctor-cell">
+                                <div className="doc-avatar-sm">
+                                  {app.doctorId?.userId?.name?.charAt(0).toUpperCase() || 'D'}
+                                </div>
+                                <span className="doc-name">Dr. {app.doctorId?.userId?.name || 'Unknown'}</span>
                               </div>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="doctor-cell">
-                              <div className="doc-avatar-sm">
-                                {app.doctorId?.userId?.name?.charAt(0).toUpperCase() || 'D'}
+                            </td>
+                            <td>
+                              <p className="datetime-date">
+                                {appointmentDate ? new Date(appointmentDate).toLocaleDateString() : 'N/A'}
+                              </p>
+                              <p className="datetime-time">
+                                {slot ? `${slot.startTime} - ${slot.endTime}` : 'N/A'}
+                              </p>
+                            </td>
+                            <td className="booking-date">{new Date(app.createdAt).toLocaleDateString()}</td>
+                            <td>
+                              <span className={`status-badge-modern ${getStatusClass(app.status)}`}>
+                                {app.status}
+                              </span>
+                            </td>
+                            <td className="align-text-right">
+                              <div className="actions-cell">
+                                <button
+                                  className="action-btn color-slate-light"
+                                  title="Change Status"
+                                  onClick={() => handleStatusClick(app)}
+                                >
+                                  <span className="material-symbols-outlined">edit</span>
+                                </button>
+                                <button
+                                  className="action-btn color-danger-text"
+                                  title="Cancel Appointment"
+                                  onClick={() => handleDeleteClick(app)}
+                                >
+                                  <span className="material-symbols-outlined">delete</span>
+                                </button>
                               </div>
-                              <span className="doc-name">Dr. {app.doctorId?.userId?.name || 'Unknown'}</span>
-                            </div>
-                          </td>
-                          <td>
-                            <p className="datetime-date">{new Date(app.date).toLocaleDateString()}</p>
-                            <p className="datetime-time">{app.time}</p>
-                          </td>
-                          <td className="booking-date">{new Date(app.createdAt).toLocaleDateString()}</td>
-                          <td>
-                            <span className={`status-badge-modern ${getStatusClass(app.status)}`}>
-                              {app.status}
-                            </span>
-                          </td>
-                          <td className="align-text-right">
-                            <div className="actions-cell">
-                              <button 
-                                className="action-btn color-slate-light" 
-                                title="Change Status"
-                                onClick={() => handleStatusClick(app)}
-                              >
-                                <span className="material-symbols-outlined">edit</span>
-                              </button>
-                              <button 
-                                className="action-btn color-danger-text" 
-                                title="Cancel Appointment"
-                                onClick={() => handleDeleteClick(app)}
-                              >
-                                <span className="material-symbols-outlined">delete</span>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                            </td>
+                          </tr>
+                        );
+                      })
                     ) : (
                       <tr>
                         <td colSpan="6" className="align-text-center py-8 color-slate-medium">No appointments found.</td>

@@ -35,7 +35,15 @@ const getAppointments = async (req, res) => {
   try {
     const appointments = await Appointment.find()
       .populate('patientId', 'name')
-      .populate('doctorId', 'specialty');
+      .populate({
+        path: 'doctorId',
+        select: 'specialty userId clinic',
+        populate: { path: 'userId', select: 'name email' },
+      })
+      .populate({
+        path: 'bookingId',
+        populate: { path: 'slotId', select: 'startTime endTime' },
+      });
     res.status(200).json(appointments);
   } catch (error) {
     handleError(res, 500, 'Server error', error);
