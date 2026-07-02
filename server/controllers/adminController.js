@@ -154,8 +154,6 @@ const getAnalytics = async (req, res) => {
           appointmentCount: { $sum: 1 },
         },
       },
-      { $sort: { appointmentCount: -1 } },
-      { $limit: 5 },
       {
         $lookup: {
           from: 'doctors',
@@ -165,6 +163,13 @@ const getAnalytics = async (req, res) => {
         },
       },
       { $unwind: '$doctor' },
+      {
+        $addFields: {
+          performanceScore: { $multiply: [ '$appointmentCount', { $ifNull: [ '$doctor.rating', 0 ] } ] }
+        }
+      },
+      { $sort: { performanceScore: -1, appointmentCount: -1 } },
+      { $limit: 5 },
       {
         $lookup: {
           from: 'users',

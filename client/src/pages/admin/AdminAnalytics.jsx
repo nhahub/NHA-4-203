@@ -448,7 +448,7 @@ export default function AdminAnalytics() {
                           <td>
                             <div className="flex-rating">
                               <span className="material-symbols-outlined color-warning-text" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
-                              <span className="font-bold">{doc.rating || '0.0'}</span>
+                              <span className="font-bold">{doc.rating ? Number(doc.rating).toFixed(1) : '0.0'}</span>
                             </div>
                           </td>
                         </tr>

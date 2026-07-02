@@ -16,9 +16,6 @@ export default function AdminHeader({ onMenuClick }) {
       </div>
       <div className="admin-header-right">
         <NotificationDropdown />
-        <button className="admin-header-icon-btn">
-          <span className="material-symbols-outlined">help_outline</span>
-        </button>
         
         <div className="admin-header-divider"></div>
         

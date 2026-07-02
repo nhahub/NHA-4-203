@@ -314,12 +314,6 @@ export default function AdminDoctors() {
                 >
                   All Specialties
                 </button>
-                <button
-                  className={`tab-btn ${activeTab === 'On-Duty' ? 'active' : ''}`}
-                  onClick={() => { setActiveTab('On-Duty'); setCurrentPage(1); }}
-                >
-                  On-Duty
-                </button>
               </div>
               <div className="search-controls">
                 <div className="search-input-wrapper">

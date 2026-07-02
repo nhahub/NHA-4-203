@@ -311,7 +311,6 @@
 
 .badge-admin { background: #f1f5f9; color: #334155; }
 .badge-doctor { background: #eff6ff; color: #005596; }
-.badge-nurse { background: #fdf4ff; color: #854100; }
 .badge-patient { background: #f0fdfa; color: #00725e; }
 
 .status-badge.active {
@@ -427,81 +426,6 @@
   font-weight: 700;
 }
 
-/* Help Cards */
-.help-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 32px;
-  margin-top: 40px;
-}
-
-@media (min-width: 768px) {
-  .help-cards-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-.help-card {
-  padding: 32px;
-  border-radius: 16px;
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
-}
-
-.bg-primary-subtle {
-  background-color: rgba(0, 85, 150, 0.05);
-  border: 1px solid rgba(0, 85, 150, 0.1);
-}
-
-.bg-secondary-subtle {
-  background-color: rgba(0, 107, 88, 0.05);
-  border: 1px solid rgba(0, 107, 88, 0.1);
-}
-
-.help-icon {
-  padding: 16px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-}
-
-.bg-primary { background-color: #005596; }
-.bg-secondary { background-color: #006b58; }
-
-.help-card h4 {
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0 0 8px 0;
-  color: #1A1F36;
-}
-
-.help-card p {
-  font-size: 16px;
-  color: #6B7280;
-  margin: 0 0 16px 0;
-  line-height: 1.5;
-}
-
-.color-primary-text-btn, .color-secondary-text-btn {
-  background: transparent;
-  border: none;
-  font-family: 'Manrope', sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 0;
-}
-
-.color-primary-text-btn { color: #005596; }
-.color-secondary-text-btn { color: #006b58; }
-
-.color-primary-text-btn:hover, .color-secondary-text-btn:hover {
-  text-decoration: underline;
-}
 
 @media (max-width: 1024px) {
   .users-main { margin-left: 0; padding-left: 16px; padding-right: 16px; }

@@ -51,7 +51,9 @@ const getDoctors = async (req, res) => {
     }
 
     // Build query with populated user data (name, email from User collection)
-    let query = Doctor.find(doctorFilter).populate('userId', 'name email');
+    let query = Doctor.find(doctorFilter)
+      .populate('userId', 'name email')
+      .sort({ _id: 1 });
 
     // Apply pagination limit if specified
     if (limit) query = query.limit(parseInt(limit));

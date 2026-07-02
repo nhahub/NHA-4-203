@@ -14,3 +14,9 @@ export function getRoleDashboard(role) {
 export function isStaffRole(role) {
   return role === 'doctor' || role === 'admin';
 }
+
+export function formatDoctorName(name) {
+  if (!name) return 'Doctor';
+  if (/^dr\.?\s/i.test(name.trim())) return name.trim();
+  return `${name}`;
+}

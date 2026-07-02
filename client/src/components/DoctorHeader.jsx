@@ -9,7 +9,7 @@ const API_BASE = 'http://localhost:5000';
 function formatDoctorName(name) {
   if (!name) return 'Doctor';
   if (/^dr\.?\s/i.test(name.trim())) return name.trim();
-  return `Dr. ${name}`;
+  return `${name}`;
 }
 
 export default function DoctorHeader({ onMenuClick }) {

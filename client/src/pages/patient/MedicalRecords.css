@@ -320,13 +320,13 @@
 
 .records-detail-grid {
   display: grid;
-  grid-template-cols: 1fr;
+  grid-template-columns: 1fr;
   gap: 24px;
 }
 
 @media (min-width: 992px) {
   .records-detail-grid {
-    grid-template-cols: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
   }
 }
 

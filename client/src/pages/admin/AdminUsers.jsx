@@ -185,7 +185,6 @@ export default function AdminUsers() {
     switch (role.toLowerCase()) {
       case 'admin': return 'badge-admin';
       case 'doctor': return 'badge-doctor';
-      case 'nurse': return 'badge-nurse';
       default: return 'badge-patient';
     }
   };
@@ -199,7 +198,6 @@ export default function AdminUsers() {
     let mappedRole = roleFilter;
     if (roleFilter === 'Administrator') mappedRole = 'admin';
     if (roleFilter === 'Doctor') mappedRole = 'doctor';
-    if (roleFilter === 'Nurse') mappedRole = 'nurse';
     if (roleFilter === 'Patient') mappedRole = 'patient';
 
     const matchesRole = roleFilter === 'All Roles' || user.role === mappedRole;
@@ -332,15 +330,10 @@ export default function AdminUsers() {
                     <option>All Roles</option>
                     <option>Administrator</option>
                     <option>Doctor</option>
-                    <option>Nurse</option>
                     <option>Patient</option>
                   </select>
                   <span className="material-symbols-outlined select-arrow">expand_more</span>
                 </div>
-                <button className="btn-text">
-                  <span className="material-symbols-outlined">filter_list</span>
-                  More Filters
-                </button>
               </div>
               <p className="showing-text">
                 Showing <span>{(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filteredUsers.length)}</span> of {filteredUsers.length} users
@@ -437,35 +430,6 @@ export default function AdminUsers() {
             />
           </div>
 
-          {/* Contextual Help */}
-          <div className="help-cards-grid">
-            <div className="help-card bg-primary-subtle">
-              <div className="help-icon bg-primary text-white">
-                <span className="material-symbols-outlined">security</span>
-              </div>
-              <div>
-                <h4>User Security Audit</h4>
-                <p>Run a comprehensive security scan on user access tokens and permission tiers to ensure compliance with HIPAA regulations.</p>
-                <button className="color-primary-text-btn" onClick={() => showToast('Audit Report generation started', 'success')}>
-                  Initialize Audit Report
-                  <span className="material-symbols-outlined">arrow_forward</span>
-                </button>
-              </div>
-            </div>
-            <div className="help-card bg-secondary-subtle">
-              <div className="help-icon bg-secondary text-white">
-                <span className="material-symbols-outlined">send_time_extension</span>
-              </div>
-              <div>
-                <h4>Bulk Invitations</h4>
-                <p>Onboard multiple clinicians simultaneously by uploading a CSV list or connecting your hospital's LDAP directory.</p>
-                <button className="color-secondary-text-btn" onClick={() => showToast('Bulk upload dialog opened', 'success')}>
-                  Upload Directory
-                  <span className="material-symbols-outlined">upload_file</span>
-                </button>
-              </div>
-            </div>
-          </div>
 
         </main>
       </div>
