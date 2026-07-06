@@ -279,18 +279,6 @@ export default function AdminUsers() {
             <div className="users-stat-card">
               <div className="stat-card-top">
                 <div>
-                  <p className="stat-label">PENDING APPROVAL</p>
-                  <h3>{pendingApprovalCount}</h3>
-                </div>
-                <div className="stat-icon bg-warning-light color-warning-text">
-                  <span className="material-symbols-outlined">pending_actions</span>
-                </div>
-              </div>
-              <p className="stat-trend trend-warning">Requires immediate review</p>
-            </div>
-            <div className="users-stat-card">
-              <div className="stat-card-top">
-                <div>
                   <p className="stat-label">SYSTEM UPTIME</p>
                   <h3>99.98%</h3>
                 </div>

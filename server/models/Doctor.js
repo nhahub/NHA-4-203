@@ -35,6 +35,9 @@ const doctorSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  address: {
+    type: String,
+  },
   location: {
     type: {
       type: String,

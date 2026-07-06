@@ -194,7 +194,7 @@ export default function Doctors() {
                 const avatar = doc.userId?.avatar;
                 const experience = doc.experience || 5;
                 const clinic = doc.clinic || 'General Medical Clinic';
-                const rating = doc.rating || 4.5;
+                const rating = doc.rating !== undefined ? doc.rating : 0;
                 const reviewsCount = doc.reviewsCount || 0;
                 const isVerified = doc.isVerified;
 

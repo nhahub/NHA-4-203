@@ -965,7 +965,7 @@
 }
 
 .booking-map-media {
-  height: 140px;
+  height: 200px;
   position: relative;
   overflow: hidden;
 }
@@ -974,6 +974,16 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.booking-map-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
 }
 
 .booking-map-overlay {

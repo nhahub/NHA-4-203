@@ -1,5 +1,5 @@
 const dns = require('dns');
-// DNS config for reliability (some ISPs have issues with default resolver)
+
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 const express = require('express');

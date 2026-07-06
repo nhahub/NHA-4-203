@@ -37,13 +37,14 @@ const getAppointments = async (req, res) => {
       .populate('patientId', 'name')
       .populate({
         path: 'doctorId',
-        select: 'specialty userId clinic',
+        select: 'specialty clinic userId',
         populate: { path: 'userId', select: 'name email' },
       })
       .populate({
         path: 'bookingId',
-        populate: { path: 'slotId', select: 'startTime endTime' },
-      });
+        populate: { path: 'slotId' },
+      })
+      .sort({ createdAt: -1 });
     res.status(200).json(appointments);
   } catch (error) {
     handleError(res, 500, 'Server error', error);
@@ -173,7 +174,7 @@ const getAnalytics = async (req, res) => {
       { $unwind: '$doctor' },
       {
         $addFields: {
-          performanceScore: { $multiply: [ '$appointmentCount', { $ifNull: [ '$doctor.rating', 0 ] } ] }
+          performanceScore: { $multiply: ['$appointmentCount', { $ifNull: ['$doctor.rating', 0] }] }
         }
       },
       { $sort: { performanceScore: -1, appointmentCount: -1 } },
@@ -306,7 +307,7 @@ const getAnalytics = async (req, res) => {
 const createUser = async (req, res) => {
   try {
     const { name, email, role, password } = req.body;
-    
+
     if (!name || !email) {
       return res.status(400).json({ message: 'Name and email are required' });
     }
@@ -344,7 +345,7 @@ const updateUser = async (req, res) => {
       { name, email, role, isActive },
       { new: true }
     ).select('-password');
-    
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -361,12 +362,12 @@ const deleteUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
+
     // If user is a doctor, delete their doctor profile too
     if (user.role === 'doctor') {
       await Doctor.deleteOne({ userId: req.params.id });
     }
-    
+
     res.status(200).json({ message: 'User deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -380,10 +381,10 @@ const toggleUserStatus = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
+
     user.isActive = !user.isActive;
     await user.save();
-    
+
     res.status(200).json({ message: 'User status updated', user });
   } catch (error) {
     handleError(res, 500, 'Server error', error);
@@ -395,7 +396,7 @@ const toggleUserStatus = async (req, res) => {
 const createDoctor = async (req, res) => {
   try {
     const { name, email, password, specialty, clinic, experience } = req.body;
-    
+
     if (!name || !email || !specialty) {
       return res.status(400).json({ message: 'Name, email, and specialty are required' });
     }
@@ -446,7 +447,7 @@ const updateDoctor = async (req, res) => {
       { specialty, clinic, experience, isVerified, isActive },
       { new: true }
     ).populate('userId', 'name email');
-    
+
     if (!doctor) {
       return res.status(404).json({ message: 'Doctor not found' });
     }
@@ -463,10 +464,10 @@ const verifyDoctor = async (req, res) => {
     if (!doctor) {
       return res.status(404).json({ message: 'Doctor not found' });
     }
-    
+
     doctor.isVerified = true;
     await doctor.save();
-    
+
     res.status(200).json({ message: 'Doctor verified successfully', doctor });
   } catch (error) {
     handleError(res, 500, 'Server error', error);
@@ -480,10 +481,10 @@ const toggleDoctorStatus = async (req, res) => {
     if (!doctor) {
       return res.status(404).json({ message: 'Doctor not found' });
     }
-    
+
     doctor.isActive = !doctor.isActive;
     await doctor.save();
-    
+
     res.status(200).json({ message: 'Doctor status updated', doctor });
   } catch (error) {
     handleError(res, 500, 'Server error', error);
@@ -497,10 +498,10 @@ const deleteDoctor = async (req, res) => {
     if (!doctor) {
       return res.status(404).json({ message: 'Doctor not found' });
     }
-    
+
     // Delete associated user
     await User.findByIdAndDelete(doctor.userId);
-    
+
     res.status(200).json({ message: 'Doctor deleted successfully' });
   } catch (error) {
     handleError(res, 500, 'Server error', error);
@@ -518,9 +519,16 @@ const updateAppointment = async (req, res) => {
       { new: true }
     )
       .populate('patientId', 'name email')
-      .populate('doctorId', 'specialty')
-      .populate('bookingId');
-    
+      .populate({
+        path: 'doctorId',
+        select: 'specialty clinic userId',
+        populate: { path: 'userId', select: 'name email' },
+      })
+      .populate({
+        path: 'bookingId',
+        populate: { path: 'slotId' },
+      });
+
     if (!appointment) {
       return res.status(404).json({ message: 'Appointment not found' });
     }
@@ -558,7 +566,7 @@ const approveReview = async (req, res) => {
         populate: { path: 'userId', select: 'name email' },
         select: 'specialty userId',
       });
-    
+
     if (!review) {
       return res.status(404).json({ message: 'Review not found' });
     }
@@ -582,7 +590,7 @@ const flagReview = async (req, res) => {
         populate: { path: 'userId', select: 'name email' },
         select: 'specialty userId',
       });
-    
+
     if (!review) {
       return res.status(404).json({ message: 'Review not found' });
     }

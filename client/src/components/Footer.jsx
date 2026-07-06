@@ -36,7 +36,7 @@ export default function Footer() {
           <ul>
             <li><Link to="/doctors">Book Appointment</Link></li>
             <li><Link to="/patient/records">Medical Records</Link></li>
-            <li><Link to="/patient/results">Upload Results</Link></li>
+            <li><Link to="/patient/upload">Upload Results</Link></li>
             <li><Link to="/patient/map">Map Search</Link></li>
           </ul>
         </div>

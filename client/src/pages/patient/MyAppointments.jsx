@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getUserAppointments, updateAppointmentStatus } from '../../services/api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { formatDoctorName } from '../../utils/roleRoutes';
 import './MyAppointments.css';
 
 export default function MyAppointments() {
@@ -111,19 +110,19 @@ export default function MyAppointments() {
           </div>
           {/* Tab Navigation */}
           <div className="my-appointments-tabs-container">
-            <button
+            <button 
               className={`my-appointments-tab ${activeTab === 'upcoming' ? 'active' : ''}`}
               onClick={() => setActiveTab('upcoming')}
             >
               Upcoming
             </button>
-            <button
+            <button 
               className={`my-appointments-tab ${activeTab === 'past' ? 'active' : ''}`}
               onClick={() => setActiveTab('past')}
             >
               Past
             </button>
-            <button
+            <button 
               className={`my-appointments-tab ${activeTab === 'cancelled' ? 'active' : ''}`}
               onClick={() => setActiveTab('cancelled')}
             >
@@ -153,7 +152,7 @@ export default function MyAppointments() {
               return (
                 <div key={appt._id} className="appointment-premium-card group">
                   <div className="appointment-card-inner">
-
+                    
                     {/* Doctor info section */}
                     <div className="appointment-card-doctor-info">
                       <div className="appointment-card-avatar-wrapper">
@@ -171,7 +170,7 @@ export default function MyAppointments() {
                         )}
                       </div>
                       <div>
-                        <h3 className="appointment-card-doctor-name">{formatDoctorName(docName)}</h3>
+                        <h3 className="appointment-card-doctor-name">Dr. {docName}</h3>
                         <div className="appointment-card-specialty-row">
                           <span className="material-symbols-outlined">medical_services</span>
                           {docSpecialty}
@@ -190,7 +189,7 @@ export default function MyAppointments() {
                           <p className="appointment-col-value">{formattedDate}</p>
                         </div>
                       </div>
-
+                      
                       <div className="appointment-card-col">
                         <div className="appointment-col-icon-box">
                           <span className="material-symbols-outlined">schedule</span>
@@ -208,10 +207,10 @@ export default function MyAppointments() {
                         <span className="status-badge-dot"></span>
                         {appt.status.charAt(0).toUpperCase() + appt.status.slice(1)}
                       </div>
-
+                      
                       <div className="appointment-card-buttons">
                         {(appt.status === 'confirmed' || appt.status === 'pending') && (
-                          <button
+                          <button 
                             className="appointment-btn-reschedule"
                             onClick={() => navigate(`/patient/book/${doc._id}`)}
                           >
@@ -219,7 +218,7 @@ export default function MyAppointments() {
                           </button>
                         )}
                         {(appt.status === 'confirmed' || appt.status === 'pending') && (
-                          <button
+                          <button 
                             className="appointment-btn-cancel-action"
                             onClick={() => handleCancel(appt._id)}
                             disabled={cancellingId === appt._id}
@@ -227,7 +226,7 @@ export default function MyAppointments() {
                             {cancellingId === appt._id ? 'Cancelling...' : 'Cancel'}
                           </button>
                         )}
-                        <button
+                        <button 
                           className="appointment-btn-details"
                           onClick={() => setExpandedId(isExpanded ? null : appt._id)}
                         >
@@ -282,7 +281,7 @@ export default function MyAppointments() {
 
         {/* Sidebar / Supplemental Info (Asymmetric Layout at the Bottom) */}
         <div className="my-appointments-supplemental-row">
-
+          
           {/* Telehealth Promo */}
           <div className="telehealth-consultations-banner">
             <div className="telehealth-banner-icon-box">
@@ -293,11 +292,11 @@ export default function MyAppointments() {
               <p className="telehealth-banner-paragraph">
                 Did you know you can see most of our doctors via a secure video call? Save travel time and book a virtual appointment today.
               </p>
-              <button
+              <button 
                 className="telehealth-explore-link"
                 onClick={() => navigate('/doctors')}
               >
-                Explore Telehealth Options
+                Explore Telehealth Options 
                 <span className="material-symbols-outlined">arrow_forward</span>
               </button>
             </div>
@@ -306,7 +305,7 @@ export default function MyAppointments() {
           {/* Stats Card */}
           <div className="appointment-sidebar-stats-card">
             <h4 className="sidebar-stats-heading">Appointment Stats</h4>
-
+            
             <div className="stats-metric-grid">
               <div className="stats-metric-box">
                 <p className="stats-metric-label">Upcoming</p>

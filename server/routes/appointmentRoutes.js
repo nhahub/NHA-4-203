@@ -8,6 +8,6 @@ const authMiddleware = require('../middleware/authMiddleware');
 const roleMiddleware = require('../middleware/roleMiddleware');
 
 router.get('/user', authMiddleware, getUserAppointments);
-router.put('/:id/status', authMiddleware, roleMiddleware(['doctor']), updateAppointmentStatus);
+router.put('/:id/status', authMiddleware, roleMiddleware(['doctor', 'patient']), updateAppointmentStatus);
 
 module.exports = router;

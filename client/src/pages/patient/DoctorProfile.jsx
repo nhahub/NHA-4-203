@@ -1,11 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import L from 'leaflet';
 import { getDoctor, getDoctorReviews, getSlots, createBooking, createReview } from '../../services/api';
 import useAuth from '../../hooks/useAuth';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import RatingStars from '../../components/RatingStars';
+import 'leaflet/dist/leaflet.css';
 import './DoctorProfile.css';
+
+// Fix for default Leaflet icon paths
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 export default function DoctorProfile() {
   const { id } = useParams();
@@ -165,7 +180,7 @@ export default function DoctorProfile() {
   const avatar = doctor.userId?.avatar;
   const experience = doctor.experience || 5;
   const clinicName = doctor.clinic || 'City Health Center';
-  const rating = doctor.rating || 4.5;
+  const rating = doctor.rating !== undefined ? doctor.rating : 0;
   const reviewsCount = doctor.reviewsCount || 0;
   const isVerified = doctor.isVerified;
 
@@ -571,21 +586,37 @@ export default function DoctorProfile() {
                 {/* Map Card */}
                 <div className="booking-map-card">
                   <div className="booking-map-media">
-                    <img 
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZ4zxtogPm9DM9XBnRaY9ftOJ2dvDvhFLqQFEGjAN_wB6jxXZraql3wY3iG4sPy-SESrPSNaDjwjc0A-yMP1NIY1Y7pEyEwtrBAZQhEsKcPrwruj4FfXswMZsu9Yd01jrDUE6Rs3uSINVQYye1_EOstKjl1iMw7oBtjH51Zv-9ZzG8-SA24c9QR9zfnmOTq1P22mL0AjchHXKdWeOuBn41vE2zidb3lpEnL2qv_MAPis0NRAKqxtKaqjaWTOn0fMaj2dcnR_DfRBPx" 
-                      alt="Clinic Map" 
-                      className="booking-map-img" 
-                    />
-                    <div className="booking-map-overlay"></div>
-                    <div className="booking-map-pin-bounce">
-                      <span className="material-symbols-outlined icon-fill">location_on</span>
-                    </div>
+                    {doctor.location?.coordinates?.length === 2 && (doctor.location.coordinates[0] !== 0 || doctor.location.coordinates[1] !== 0) ? (
+                      <MapContainer
+                        center={[doctor.location.coordinates[1], doctor.location.coordinates[0]]}
+                        zoom={15}
+                        scrollWheelZoom={false}
+                        dragging={false}
+                        zoomControl={false}
+                        attributionControl={false}
+                        style={{ width: '100%', height: '100%', borderRadius: '12px 12px 0 0' }}
+                      >
+                        <TileLayer
+                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        />
+                        <Marker position={[doctor.location.coordinates[1], doctor.location.coordinates[0]]} />
+                      </MapContainer>
+                    ) : (
+                      <div className="booking-map-placeholder">
+                        <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--color-primary, #005596)' }}>location_on</span>
+                        <p style={{ color: '#666', marginTop: '8px' }}>Map not available</p>
+                      </div>
+                    )}
                   </div>
                   <div className="booking-map-details">
                     <p className="map-clinic-title">{clinicName}</p>
-                    <p className="map-clinic-address">4521 Madison Avenue, 3rd Floor, NY 10022</p>
+                    <p className="map-clinic-address">{doctor.address || clinicName}</p>
                     <a 
-                      href={`https://maps.google.com/?q=${encodeURIComponent(clinicName + ' NY')}`}
+                      href={
+                        doctor.location?.coordinates?.length === 2
+                          ? `https://maps.google.com/?q=${doctor.location.coordinates[1]},${doctor.location.coordinates[0]}`
+                          : `https://maps.google.com/?q=${encodeURIComponent(doctor.address || clinicName)}`
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
                       className="map-get-directions-btn"

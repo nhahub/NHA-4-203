@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import { getDoctors } from '../../services/api';
 import Navbar from '../../components/Navbar';
@@ -34,6 +34,16 @@ const createDoctorIcon = (isActive) => {
         iconSize: [40, 40],
         iconAnchor: [20, 40],
         popupAnchor: [0, -40],
+    });
+};
+
+// Custom Pulsing Blue DivIcon for User Location
+const createUserIcon = () => {
+    return new L.DivIcon({
+        className: 'user-location-marker',
+        html: `<div class="user-dot-outer"><div class="user-dot-inner"></div></div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
     });
 };
 
@@ -110,26 +120,43 @@ export default function MapSearch() {
     const [userLoc, setUserLoc] = useState(null);
     const [search, setSearch] = useState('');
     const [specialty, setSpecialty] = useState('');
-    const [maxDistance, setMaxDistance] = useState(20); // default 20 km
+    const [maxDistance, setMaxDistance] = useState(400); // default 400 km
     const [minRating, setMinRating] = useState('any'); // 'any', '4.0', '4.5'
     const [availableToday, setAvailableToday] = useState(false);
     const [activeDoctorId, setActiveDoctorId] = useState(null);
 
-    // Get User Current Position on mount
+    // Get User Current Position on mount with watchPosition for live tracking
     useEffect(() => {
+        let watchId;
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
+            watchId = navigator.geolocation.watchPosition(
                 (position) => {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     setUserLoc([lat, lng]);
-                    setCenterLoc([lat, lng]);
+                    setCenterLoc((prev) => {
+                        // Only auto-center on the first fix or if user hasn't panned
+                        if (!prev || (prev[0] === DEFAULT_CENTER[0] && prev[1] === DEFAULT_CENTER[1])) {
+                            return [lat, lng];
+                        }
+                        return prev;
+                    });
                 },
-                () => {
-                    console.log('Geolocation permission denied. Using Cairo center.');
+                (err) => {
+                    console.log('Geolocation error:', err.message, '- Using Cairo center.');
+                },
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 10000,      // Cache for 10 seconds max
+                    timeout: 15000,         // Wait up to 15 seconds
                 }
             );
         }
+        return () => {
+            if (watchId !== undefined) {
+                navigator.geolocation.clearWatch(watchId);
+            }
+        };
     }, []);
 
     // Fetch doctors matching specialty and search name
@@ -173,12 +200,16 @@ export default function MapSearch() {
         }
 
         // 3. Location / Distance Filter
+        // Doctors without coordinates are always shown (don't hide them just because no location)
         if (doc.location?.coordinates?.length === 2) {
             const docLng = doc.location.coordinates[0];
             const docLat = doc.location.coordinates[1];
-            const origin = userLoc || DEFAULT_CENTER;
-            const dist = getDistanceKm(origin[0], origin[1], docLat, docLng);
-            if (dist > maxDistance) return false;
+            // Only filter by distance if we have valid doctor coordinates (not 0,0)
+            if (docLng !== 0 || docLat !== 0) {
+                const origin = userLoc || DEFAULT_CENTER;
+                const dist = getDistanceKm(origin[0], origin[1], docLat, docLng);
+                if (dist > maxDistance) return false;
+            }
         }
 
         return true;
@@ -186,7 +217,7 @@ export default function MapSearch() {
 
     const handleResetFilters = () => {
         setSpecialty('');
-        setMaxDistance(20);
+        setMaxDistance(400);
         setMinRating('any');
         setAvailableToday(false);
         setSearch('');
@@ -204,14 +235,24 @@ export default function MapSearch() {
                         center={DEFAULT_CENTER}
                         zoom={13}
                         scrollWheelZoom={true}
+                        zoomControl={false}
                         style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 0 }}
                     >
                         <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
+                        <ZoomControl position="bottomright" />
                         <MapRecenter center={centerLoc} />
                         <MapResizeHandler />
+
+                        {/* User Location Marker */}
+                        {userLoc && (
+                            <Marker
+                                position={userLoc}
+                                icon={createUserIcon()}
+                            />
+                        )}
 
                         {/* Render Doctor Markers */}
                         {filteredDoctors.map((doc) => {
@@ -317,13 +358,13 @@ export default function MapSearch() {
                                 type="range"
                                 className="distance-range-slider"
                                 min="1"
-                                max="100"
+                                max="500"
                                 value={maxDistance}
                                 onChange={(e) => setMaxDistance(parseInt(e.target.value))}
                             />
                             <div className="slider-range-labels">
                                 <span>1 km</span>
-                                <span>100 km</span>
+                                <span>500 km</span>
                             </div>
                         </div>
 
@@ -400,6 +441,20 @@ export default function MapSearch() {
                             Switch to List View
                         </Link>
                     </div>
+
+                    {/* Locate Me Button */}
+                    {userLoc && (
+                        <div className="floating-toggle-view-wrapper">
+                            <button
+                                className="floating-btn-locate-me"
+                                onClick={() => setCenterLoc([...userLoc])}
+                                title="Re-center to my location"
+                            >
+                                <span className="material-symbols-outlined">my_location</span>
+                                Locate Me
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Map Legend (Bottom Center) */}

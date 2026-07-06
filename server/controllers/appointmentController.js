@@ -39,20 +39,41 @@ const getUserAppointments = async (req, res) => {
   }
 };
 
-// PUT /api/appointments/:id/status (doctor only)
+// PUT /api/appointments/:id/status (doctor or patient)
+// Patients can only cancel their own appointments
+// Doctors can update status on their own appointments
 const updateAppointmentStatus = async (req, res) => {
   try {
     const { status } = req.body;
 
-    const appointment = await Appointment.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    );
+    const appointment = await Appointment.findById(req.params.id);
 
     if (!appointment) {
       return res.status(404).json({ message: 'Appointment not found' });
     }
+
+    // Patient-specific restrictions
+    if (req.user.role === 'patient') {
+      // Patients can only cancel, not change to other statuses
+      if (status !== 'cancelled') {
+        return res.status(403).json({ message: 'Patients can only cancel appointments' });
+      }
+      // Patients can only cancel their own appointments
+      if (appointment.patientId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ message: 'You can only cancel your own appointments' });
+      }
+    }
+
+    // Doctor-specific restrictions
+    if (req.user.role === 'doctor') {
+      const doctor = await Doctor.findOne({ userId: req.user._id });
+      if (!doctor || appointment.doctorId.toString() !== doctor._id.toString()) {
+        return res.status(403).json({ message: 'You can only update your own appointments' });
+      }
+    }
+
+    appointment.status = status;
+    await appointment.save();
 
     res.status(200).json(appointment);
   } catch (error) {

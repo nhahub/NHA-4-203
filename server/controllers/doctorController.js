@@ -12,7 +12,7 @@ const createDoctor = async (req, res) => {
       return res.status(400).json({ message: 'Doctor profile already exists for this user' });
     }
 
-    const { specialty, clinic, experience, availableSlots, location } = req.body;
+    const { specialty, clinic, experience, availableSlots, location, address } = req.body;
 
     const doctor = await Doctor.create({
       userId: req.user._id,
@@ -21,6 +21,7 @@ const createDoctor = async (req, res) => {
       experience,
       availableSlots,
       location,
+      address,
     });
 
     res.status(201).json(doctor);
@@ -112,11 +113,11 @@ const getDoctorById = async (req, res) => {
 // PUT /api/doctors/:id/profile (doctor only)
 const updateDoctorProfile = async (req, res) => {
   try {
-    const { specialty, clinic, experience, availableSlots, location } = req.body;
+    const { specialty, clinic, experience, availableSlots, location, address } = req.body;
 
     const doctor = await Doctor.findByIdAndUpdate(
       req.params.id,
-      { specialty, clinic, experience, availableSlots, location },
+      { specialty, clinic, experience, availableSlots, location, address },
       { new: true }
     );
 
