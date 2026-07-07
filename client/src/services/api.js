@@ -85,6 +85,14 @@ export const getNotifications = () => API.get('/notifications');
 export const markNotificationRead = (id) => API.patch(`/notifications/${id}/read`);
 export const markAllNotificationsRead = () => API.patch('/notifications/read-all');
 
+// Chat
+export const getChatConversations = () => API.get('/chat/conversations');
+export const getOrCreateChatConversation = (doctorId, appointmentId) =>
+  API.post(`/chat/conversations/${doctorId}`, { appointmentId });
+export const getChatMessages = (conversationId) => API.get(`/chat/messages/${conversationId}`);
+export const sendChatMessage = (data) => API.post('/chat/messages', data);
+export const markChatMessagesRead = (conversationId) => API.patch(`/chat/messages/read/${conversationId}`);
+
 // Admin
 export const getAdminUsers = () => API.get('/admin/users');
 export const getAdminDoctors = () => API.get('/admin/doctors');

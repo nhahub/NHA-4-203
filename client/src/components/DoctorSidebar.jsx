@@ -96,6 +96,15 @@ export default function DoctorSidebar({ activePage, isOpen, onClose }) {
             <span className="material-symbols-outlined">medical_services</span>
             <span>Diagnosis</span>
           </NavLink>
+
+          <NavLink
+            to="/doctor/chat"
+            className={`doctor-nav-link ${activePage === 'chat' ? 'active' : ''}`}
+            onClick={handleNavClick}
+          >
+            <span className="material-symbols-outlined">chat</span>
+            <span>Messages</span>
+          </NavLink>
         </nav>
 
         <div className="doctor-sidebar-bottom">
