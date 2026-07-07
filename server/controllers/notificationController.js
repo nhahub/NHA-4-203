@@ -4,6 +4,10 @@ const Notification = require('../models/Notification');
 // Fetch all notifications for logged-in user
 const getNotifications = async (req, res) => {
   try {
+    if (req.user.role === 'admin') {
+      return res.status(200).json([]);
+    }
+
     const notifications = await Notification.find({ user: req.user._id })
       .sort({ createdAt: -1 })
       .limit(50); // Get recent 50 notifications

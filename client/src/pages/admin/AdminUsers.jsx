@@ -276,18 +276,6 @@ export default function AdminUsers() {
               </div>
               <p className="stat-trend trend-neutral">Current session average: 18m</p>
             </div>
-            <div className="users-stat-card">
-              <div className="stat-card-top">
-                <div>
-                  <p className="stat-label">SYSTEM UPTIME</p>
-                  <h3>99.98%</h3>
-                </div>
-                <div className="stat-icon bg-primary-light color-primary-text">
-                  <span className="material-symbols-outlined">dns</span>
-                </div>
-              </div>
-              <p className="stat-trend trend-up">Operational</p>
-            </div>
           </div>
 
           {/* Table Area */}

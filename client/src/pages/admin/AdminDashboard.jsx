@@ -29,7 +29,7 @@ export default function AdminDashboard() {
         
         const sortedUsers = usersRes.data.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        ).slice(0, 5);
+        ).slice(0, 8);
         setRecentUsers(sortedUsers);
       } catch (err) {
         console.error('Failed to load dashboard data');
@@ -80,12 +80,6 @@ export default function AdminDashboard() {
               <div>
                 <h2>Dashboard Overview</h2>
                 <p>Welcome back. Here's what's happening today.</p>
-              </div>
-              <div className="dashboard-header-actions">
-                <button className="btn-outline">
-                  <span className="material-symbols-outlined">file_download</span>
-                  View Reports
-                </button>
               </div>
             </div>
 
@@ -239,64 +233,11 @@ export default function AdminDashboard() {
                     
                     {/* Activity items are now solely derived from recentUsers above */}
                   </div>
-                  
-                  {/* Promo Card */}
-                  <div className="promo-card">
-                    <h4>System Upgrade</h4>
-                    <p>V2.4 roll-out starts this Saturday at 02:00 AM UTC. Please notify staff.</p>
-                    <button>Learn More</button>
-                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Bottom Quick Actions */}
-            <div className="quick-actions-grid">
-              <div className="quick-action-card">
-                <div className="action-info">
-                  <div className="action-icon bg-pale-blue text-blue-600">
-                    <span className="material-symbols-outlined">shield</span>
-                  </div>
-                  <div>
-                    <p className="title">Security Status</p>
-                    <p className="subtitle">Last scan 4h ago</p>
-                  </div>
-                </div>
-                <span className="status-text text-teal-500">Protected</span>
-              </div>
 
-              <div className="quick-action-card">
-                <div className="action-info">
-                  <div className="action-icon bg-pale-teal text-teal-600">
-                    <span className="material-symbols-outlined">database</span>
-                  </div>
-                  <div>
-                    <p className="title">Cloud Storage</p>
-                    <p className="subtitle">82% of 5TB used</p>
-                  </div>
-                </div>
-                <div className="progress-bar-wrap">
-                  <div className="progress-bar" style={{ width: '82%' }}></div>
-                </div>
-              </div>
-
-              <div className="quick-action-card">
-                <div className="action-info">
-                  <div className="action-icon bg-pale-amber text-amber-600">
-                    <span className="material-symbols-outlined">support_agent</span>
-                  </div>
-                  <div>
-                    <p className="title">Active Support</p>
-                    <p className="subtitle">3 agents online</p>
-                  </div>
-                </div>
-                <div className="avatar-group">
-                  <div className="avatar"></div>
-                  <div className="avatar"></div>
-                  <div className="avatar"></div>
-                </div>
-              </div>
-            </div>
 
           </div>
         </main>

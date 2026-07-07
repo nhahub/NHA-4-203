@@ -1,6 +1,7 @@
 const LabResult = require('../models/LabResult');
 const Doctor = require('../models/Doctor');
 const Appointment = require('../models/Appointment');
+const Notification = require('../models/Notification');
 const multer = require('multer');
 const path = require('path');
 
@@ -26,9 +27,25 @@ const uploadResult = async (req, res) => {
       patientId: req.user._id,
       doctorId,
       testName,
-      fileUrl: req.file ? `/uploads/${req.file.filename}` : '',
+      fileUrl: req.file ? `uploads/${req.file.filename}` : '',
       status: 'pending',
     });
+
+    // Notify doctor
+    try {
+      const docRecord = await Doctor.findById(doctorId);
+      if (docRecord) {
+        await Notification.create({
+          user: docRecord.userId,
+          title: 'New Lab Result Uploaded',
+          message: `Patient ${req.user.name} has uploaded a new lab result: ${testName}.`,
+          type: 'result',
+          isRead: false
+        });
+      }
+    } catch (notifErr) {
+      console.error('Failed to notify doctor on result upload:', notifErr);
+    }
 
     res.status(201).json(result);
   } catch (error) {
@@ -79,6 +96,19 @@ const updateResultStatus = async (req, res) => {
       return res.status(404).json({ message: 'Lab result not found' });
     }
 
+    // Notify patient
+    try {
+      await Notification.create({
+        user: result.patientId,
+        title: 'Lab Result Reviewed',
+        message: `Your lab result "${result.testName}" has been reviewed by your provider and marked as ${status}.`,
+        type: 'result',
+        isRead: false
+      });
+    } catch (notifErr) {
+      console.error('Failed to notify patient on result status update:', notifErr);
+    }
+
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -102,4 +132,33 @@ const getPatientResults = async (req, res) => {
   }
 };
 
-module.exports = { upload, uploadResult, getDoctorResults, updateResultStatus, getPatientResults };
+// DELETE /api/results/:id (patient only)
+const deleteResult = async (req, res) => {
+  try {
+    const result = await LabResult.findById(req.params.id);
+    if (!result) {
+      return res.status(404).json({ message: 'Lab result not found' });
+    }
+
+    if (result.patientId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to delete this result' });
+    }
+
+    // Delete the physical file from disk if it exists
+    if (result.fileUrl) {
+      const fs = require('fs');
+      const filePath = path.join(__dirname, '..', result.fileUrl);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+
+    await LabResult.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({ message: 'Lab result deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = { upload, uploadResult, getDoctorResults, updateResultStatus, getPatientResults, deleteResult };

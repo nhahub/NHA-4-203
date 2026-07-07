@@ -401,6 +401,22 @@
   color: #005596;
 }
 
+.upload-result-delete {
+  border: none;
+  cursor: pointer;
+  background: none;
+}
+
+.upload-result-delete:hover {
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+}
+
+.upload-result-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .upload-results-empty {
   text-align: center;
   padding: 40px 0;

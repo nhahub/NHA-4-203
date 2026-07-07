@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Notification = require('../models/Notification');
 const Slot = require('../models/Slot');
 const Booking = require('../models/Booking');
@@ -7,50 +8,62 @@ const User = require('../models/User'); // Need User to get patient name for not
 // POST /api/bookings (patient only)
 // When a patient selects a time slot, this creates the booking and appointment
 const createBooking = async (req, res) => {
+  const session = await mongoose.startSession();
   try {
+    session.startTransaction();
+
     const { slotId, doctorId } = req.body;
 
-    // Check that the slot exists
-    const slot = await Slot.findById(slotId);
+    // Check that the slot exists and lock it within the transaction
+    const slot = await Slot.findById(slotId).session(session);
     if (!slot) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({ message: 'Slot not found' });
     }
 
     // Make sure the slot isn't already taken by another patient
-    // TODO: Add MongoDB transaction here - currently there's a race condition if two requests come simultaneously
+    // The transaction ensures atomicity — no race condition possible
     if (slot.isBooked) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ message: 'Slot is already booked' });
     }
 
     slot.isBooked = true;
-    await slot.save();
+    await slot.save({ session });
 
-    const booking = await Booking.create({
+    const booking = await Booking.create([{
       slotId,
       patientId: req.user._id,
       doctorId,
-    });
+    }], { session });
 
-    const appointment = await Appointment.create({
-      bookingId: booking._id,
+    const appointment = await Appointment.create([{
+      bookingId: booking[0]._id,
       patientId: req.user._id,
       doctorId,
       status: 'pending',
-    });
+    }], { session });
 
     // --- TRIGGER NOTIFICATION ---
     // Notify the doctor about the new appointment
-    const patientUser = await User.findById(req.user._id);
-    await Notification.create({
+    const patientUser = await User.findById(req.user._id).session(session);
+    await Notification.create([{
       user: doctorId,
       title: 'New Appointment Booked',
       message: `${patientUser.name} has booked a new appointment.`,
       type: 'appointment',
-      relatedId: appointment._id
-    });
+      relatedId: appointment[0]._id
+    }], { session });
 
-    res.status(201).json({ booking, appointment });
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(201).json({ booking: booking[0], appointment: appointment[0] });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

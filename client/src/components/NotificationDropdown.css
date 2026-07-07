@@ -136,11 +136,12 @@
 }
 
 .notification-item.unread {
-  background: var(--primary-container);
+  background: var(--surface);
+  border-left: 4px solid var(--primary);
 }
 
 .notification-item.unread:hover {
-  background: rgba(0, 85, 150, 0.15);
+  background: var(--surface-container-low);
 }
 
 /* Icon */

@@ -307,28 +307,18 @@ export default function AdminDoctors() {
           {/* Main Table Section */}
           <div className="doctors-table-container">
             <div className="doctors-table-header">
-              <div className="table-tabs">
-                <button
-                  className={`tab-btn ${activeTab === 'All' ? 'active' : ''}`}
-                  onClick={() => { setActiveTab('All'); setCurrentPage(1); }}
-                >
-                  All Specialties
-                </button>
-              </div>
-              <div className="search-controls">
-                <div className="search-input-wrapper">
-                  <span className="material-symbols-outlined search-icon">search</span>
-                  <input
-                    type="text"
-                    placeholder="Search by name or specialty..."
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="search-input"
-                  />
-                </div>
+              <div className="search-input-wrapper">
+                <span className="material-symbols-outlined search-icon">search</span>
+                <input
+                  type="text"
+                  placeholder="Search by name or specialty..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="search-input"
+                />
               </div>
             </div>
 

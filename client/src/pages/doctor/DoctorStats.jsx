@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import {
   AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -32,7 +32,7 @@ const ChartTooltip = ({ active, payload, label }) => {
 };
 
 export default function DoctorStats() {
-  const navigate = useNavigate();
+
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -279,7 +279,7 @@ export default function DoctorStats() {
                 </div>
               </div>
 
-              <div className="doc-stats-bottom-row">
+              <div className="doc-stats-bottom-row doc-stats-bottom-single">
                 <div className="doc-stats-chart-card">
                   <h3 className="doc-stats-chart-title">Rating Distribution</h3>
                   <div className="doc-stats-rating-bars">
@@ -296,22 +296,6 @@ export default function DoctorStats() {
                       </div>
                     ))}
                   </div>
-                </div>
-
-                <div className="doc-stats-insight-card">
-                  <span className="material-symbols-outlined doc-stats-insight-icon">lightbulb</span>
-                  <h3>Optimization Insight</h3>
-                  <p>
-                    {summary.pending > 0
-                      ? `You have ${summary.pending} pending appointments. Confirming them promptly improves patient satisfaction.`
-                      : 'Your schedule is well-managed. Consider adding availability slots for peak demand days.'}
-                  </p>
-                  <button
-                    className="doc-stats-insight-btn"
-                    onClick={() => navigate('/doctor/appointments')}
-                  >
-                    Adjust Schedule
-                  </button>
                 </div>
               </div>
 

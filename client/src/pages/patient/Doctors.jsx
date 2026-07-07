@@ -171,7 +171,6 @@ export default function Doctors() {
         {/* Dynamic Quick Stats */}
         <div className="doctors-quick-stats-row">
           <div className="quick-stat-badge bg-teal">
-            <span className="badge-pulse-dot"></span>
             <span className="badge-text-strong">{filteredDoctors.length} Doctors Available</span>
           </div>
           <div className="quick-stat-badge bg-white shadow-sm">

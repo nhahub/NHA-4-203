@@ -1,7 +1,3 @@
-/* ============================================
-   Doctor Diagnosis & Prescription Styling
-   ============================================ */
-
 .diagnosis-container {
   display: grid;
   grid-template-columns: 1fr;

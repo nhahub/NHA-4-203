@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { getPatientRecords, getPatientResults, uploadResult, getUserAppointments } from '../../services/api';
+import { getPatientRecords, getPatientResults, uploadResult, getUserAppointments, deleteResult } from '../../services/api';
 import useAuth from '../../hooks/useAuth';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import AdminModal from '../../components/AdminModal';
 import './UploadResults.css';
 
 export default function UploadResults() {
@@ -19,6 +20,8 @@ export default function UploadResults() {
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState('');
   const [uploadError, setUploadError] = useState('');
+  const [deleting, setDeleting] = useState(null);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, resultId: null, testName: '' });
 
   // Data
   const [records, setRecords] = useState([]);
@@ -143,6 +146,25 @@ export default function UploadResults() {
     if (lower.endsWith('.pdf')) return 'icon-blue';
     if (lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png')) return 'icon-teal';
     return 'icon-amber';
+  };
+
+  const handleDeleteClick = (res) => {
+    setDeleteModal({ isOpen: true, resultId: res._id, testName: res.testName });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const resultId = deleteModal.resultId;
+    if (!resultId) return;
+    setDeleting(resultId);
+    setDeleteModal({ isOpen: false, resultId: null, testName: '' });
+    try {
+      await deleteResult(resultId);
+      setResults(prev => prev.filter(r => r._id !== resultId));
+    } catch (err) {
+      setUploadError(err.response?.data?.message || 'Failed to delete. Please try again.');
+    } finally {
+      setDeleting(null);
+    }
   };
 
   return (
@@ -299,18 +321,18 @@ export default function UploadResults() {
                       <p className="upload-result-date">
                         Uploaded on {new Date(res.uploadedAt || res.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                       </p>
-                    </div>
-                    {res.fileUrl && (
-                      <a
-                        href={`http://localhost:5000/${res.fileUrl.replace(/\\/g, '/')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="upload-result-action"
-                        title="Download"
-                      >
-                        <span className="material-symbols-outlined">download</span>
-                      </a>
-                    )}
+                    </div>                     <button
+                      className="upload-result-action upload-result-delete"
+                      title="Delete upload"
+                      onClick={() => handleDeleteClick(res)}
+                      disabled={deleting === res._id}
+                    >
+                      {deleting === res._id ? (
+                        <span className="spinner-small" />
+                      ) : (
+                        <span className="material-symbols-outlined">delete</span>
+                      )}
+                    </button>
                   </div>
                 ))}
               </div>
@@ -336,6 +358,22 @@ export default function UploadResults() {
           </div>
         </div>
       </main>
+
+      <AdminModal
+        isOpen={deleteModal.isOpen}
+        title="Delete Uploaded Result"
+        onClose={() => setDeleteModal({ isOpen: false, resultId: null, testName: '' })}
+        onConfirm={handleDeleteConfirm}
+        confirmText="Delete Upload"
+        isDangerous={true}
+        isLoading={deleting === deleteModal.resultId}
+      >
+        <p>Are you sure you want to delete the result <strong>{deleteModal.testName}</strong>?</p>
+        <p style={{ color: '#6B7280', fontSize: '14px', marginTop: '12px' }}>
+          This action cannot be undone. This document will be permanently deleted from the database and storage.
+        </p>
+      </AdminModal>
+
       <Footer />
     </div>
   );

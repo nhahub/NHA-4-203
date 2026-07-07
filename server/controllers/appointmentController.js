@@ -1,5 +1,6 @@
 const Appointment = require('../models/Appointment');
 const Doctor = require('../models/Doctor');
+const Notification = require('../models/Notification');
 
 // GET /api/appointments/user (auth)
 // Returns appointments specific to the logged-in user (patient sees their appointments, doctors see their scheduled appointments)
@@ -74,6 +75,32 @@ const updateAppointmentStatus = async (req, res) => {
 
     appointment.status = status;
     await appointment.save();
+
+    // Trigger Notification
+    try {
+      if (req.user.role === 'doctor') {
+        await Notification.create({
+          user: appointment.patientId,
+          title: `Appointment ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+          message: `Your appointment has been marked as ${status} by the provider.`,
+          type: 'appointment',
+          isRead: false
+        });
+      } else if (req.user.role === 'patient' && status === 'cancelled') {
+        const docRecord = await Doctor.findById(appointment.doctorId);
+        if (docRecord) {
+          await Notification.create({
+            user: docRecord.userId,
+            title: 'Appointment Cancelled',
+            message: `Patient ${req.user.name} has cancelled their appointment.`,
+            type: 'appointment',
+            isRead: false
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Failed to create notification on status change:', err);
+    }
 
     res.status(200).json(appointment);
   } catch (error) {

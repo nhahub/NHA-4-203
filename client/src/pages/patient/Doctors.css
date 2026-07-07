@@ -187,8 +187,8 @@
 }
 
 .quick-stat-badge.bg-teal {
-  background: rgba(0, 107, 88, 0.08);
-  border: 1px solid rgba(0, 107, 88, 0.2);
+  background: rgba(0, 85, 150, 0.08);
+  border: 1px solid rgba(0, 85, 150, 0.25);
 }
 
 .quick-stat-badge.bg-white {
@@ -196,23 +196,11 @@
   border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
-.badge-pulse-dot {
-  width: 8px;
-  height: 8px;
-  background-color: var(--secondary);
-  border-radius: 50%;
-  animation: pulse 1.5s infinite;
-}
 
-@keyframes pulse {
-  0% { transform: scale(0.9); opacity: 0.6; }
-  50% { transform: scale(1.2); opacity: 1; }
-  100% { transform: scale(0.9); opacity: 0.6; }
-}
 
 .badge-text-strong {
   font-weight: 700;
-  color: var(--on-secondary-container);
+  color: #005596;
 }
 
 .badge-text-medium {

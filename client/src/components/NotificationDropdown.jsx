@@ -3,8 +3,7 @@ import useAuth from '../hooks/useAuth';
 import { getNotifications, markNotificationRead, markAllNotificationsRead } from '../services/api';
 import './NotificationDropdown.css';
 
-function timeAgo(dateString) {
-  const now = new Date();
+function timeAgo(dateString, now) {
   const date = new Date(dateString);
   const seconds = Math.floor((now - date) / 1000);
 
@@ -22,7 +21,16 @@ export default function NotificationDropdown() {
   const { isAuthenticated } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [now, setNow] = useState(new Date());
   const dropdownRef = useRef(null);
+
+  // Tick timer to update timestamps in real time
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date());
+    }, 10000);
+    return () => clearInterval(timer);
+  }, []);
 
   const fetchNotifications = useCallback(async () => {
     if (!isAuthenticated) return;
@@ -141,7 +149,7 @@ export default function NotificationDropdown() {
                   <div className="notification-content">
                     <h4 className="notification-title">{n.title}</h4>
                     <p className="notification-message">{n.message}</p>
-                    <span className="notification-time">{timeAgo(n.createdAt)}</span>
+                    <span className="notification-time">{timeAgo(n.createdAt, now)}</span>
                   </div>
                 </li>
               ))

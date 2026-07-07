@@ -1,4 +1,3 @@
-import NotificationDropdown from './NotificationDropdown';
 import useAuth from '../hooks/useAuth';
 import './AdminHeader.css';
 
@@ -15,7 +14,6 @@ export default function AdminHeader({ onMenuClick }) {
         </button>
       </div>
       <div className="admin-header-right">
-        <NotificationDropdown />
         
         <div className="admin-header-divider"></div>
         

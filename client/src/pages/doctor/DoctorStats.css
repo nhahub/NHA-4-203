@@ -1,7 +1,3 @@
-/* ============================================
-   Doctor Analytics — EasyCare Design System
-   ============================================ */
-
 .doc-stats-main {
   max-width: 1440px;
   margin: 0 auto;
@@ -262,6 +258,10 @@
   grid-template-columns: 1fr 1fr;
   gap: 20px;
   margin-bottom: 28px;
+}
+
+.doc-stats-bottom-row.doc-stats-bottom-single {
+  grid-template-columns: 1fr;
 }
 
 .doc-stats-rating-bars {

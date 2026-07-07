@@ -72,6 +72,7 @@ export const getDoctorResults = () => API.get('/results/doctor/all');
 export const updateResultStatus = (id, status) =>
   API.put(`/results/${id}/status`, { status });
 export const getPatientResults = (patientId) => API.get(`/results/${patientId}`);
+export const deleteResult = (id) => API.delete(`/results/${id}`);
 
 // Reviews
 export const createReview = (doctorId, data) =>

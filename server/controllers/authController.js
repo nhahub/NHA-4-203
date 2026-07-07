@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { OAuth2Client } = require('google-auth-library');
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const Notification = require('../models/Notification');
 
 // POST /api/auth/register
 // Creates new user account - handles patient, doctor, and admin signup
@@ -34,6 +35,17 @@ const register = async (req, res) => {
       role: role || 'patient', // Default to patient if no role specified
       phone,
     });
+
+    // Create a welcome notification if user is a patient
+    if (user.role === 'patient') {
+      await Notification.create({
+        user: user._id,
+        title: 'Welcome to EasyCare',
+        message: 'Welcome to your EasyCare patient portal! Explore clinics and book appointments.',
+        type: 'system',
+        isRead: false,
+      });
+    }
 
     // Generate JWT token - valid for 7 days (adjust as needed)
     const token = jwt.sign(

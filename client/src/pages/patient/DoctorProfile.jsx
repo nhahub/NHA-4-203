@@ -249,14 +249,6 @@ export default function DoctorProfile() {
                     <p className="bento-label">Consultation</p>
                     <p className="bento-value">$120</p>
                   </div>
-                  <div className="bento-box bg-teal">
-                    <p className="bento-label">Patients</p>
-                    <p className="bento-value">1.5k+</p>
-                  </div>
-                  <div className="bento-box bg-amber">
-                    <p className="bento-label">Success Rate</p>
-                    <p className="bento-value">99%</p>
-                  </div>
                   <div className="bento-box bg-slate">
                     <p className="bento-label">Languages</p>
                     <p className="bento-value">EN, ES</p>

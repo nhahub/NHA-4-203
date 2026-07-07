@@ -377,7 +377,6 @@ input:checked + .slider-round-thumb:before {
   font-size: 18px;
 }
 
-/* Locate Me Button */
 .floating-btn-locate-me {
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(12px);

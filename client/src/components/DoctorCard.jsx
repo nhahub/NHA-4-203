@@ -16,7 +16,7 @@ export default function DoctorCard({ doctor }) {
 
   const name = userId?.name || 'Doctor';
   const avatar = userId?.avatar || null;
-  const slotsCount = availableSlots || 0;
+  const slotsCount = Array.isArray(availableSlots) ? availableSlots.length : (availableSlots || 0);
 
   return (
     <div className="doctor-card">
@@ -64,7 +64,7 @@ export default function DoctorCard({ doctor }) {
       {/* Available Slots */}
       <span className={`doctor-card-slots${slotsCount === 0 ? ' none' : ''}`}>
         <span className="material-symbols-outlined">event_available</span>
-        {slotsCount > 0 ? `${slotsCount} slots available` : 'No slots'}
+        {slotsCount} slots available
       </span>
 
       {/* Actions */}
