@@ -5,45 +5,62 @@ const Appointment = require('../models/Appointment');
 
 const getOrCreateConversation = async (req, res) => {
   try {
-    const { doctorId } = req.params;
+    const { doctorId: partnerId } = req.params; // This parameter acts as the target partner's User ID
     const { appointmentId } = req.body;
-
-    if (!doctorId) {
-      return res.status(400).json({ message: 'Doctor ID is required' });
-    }
-
-    const doctor = await User.findById(doctorId);
-    if (!doctor || doctor.role !== 'doctor') {
-      return res.status(404).json({ message: 'Doctor not found' });
-    }
 
     let appointment = null;
     if (appointmentId) {
+      // Find the appointment checking if the current user is either the patient or the doctor
       appointment = await Appointment.findOne({
         _id: appointmentId,
-        patientId: req.user._id,
+        $or: [
+          { patientId: req.user._id },
+          { doctorId: req.user._id } // if doctorId directly matches user
+        ]
       }).populate({
         path: 'doctorId',
-        populate: { path: 'userId', select: '_id' },
-      });
+        populate: { path: 'userId', select: '_id name' },
+      }).populate('patientId', 'name email');
+
+      // If doctorId references a doctor profile instead of a User model directly:
+      if (!appointment) {
+        appointment = await Appointment.findById(appointmentId).populate({
+          path: 'doctorId',
+          populate: { path: 'userId', select: '_id name' },
+        }).populate('patientId', 'name email');
+        
+        if (appointment) {
+          const docUserId = appointment.doctorId?.userId?._id || appointment.doctorId?.userId;
+          const isParticipant = appointment.patientId?._id.toString() === req.user._id.toString() || 
+                                (docUserId && docUserId.toString() === req.user._id.toString());
+          if (!isParticipant) {
+            return res.status(403).json({ message: 'Access denied' });
+          }
+        }
+      }
 
       if (!appointment) {
         return res.status(404).json({ message: 'Appointment not found' });
       }
     }
 
-    const targetDoctorId = appointment?.doctorId?.userId?._id || appointment?.doctorId?.userId || doctorId;
+    // Identify absolute IDs for both sides
+    const patientId = appointment ? appointment.patientId?._id || appointment.patientId : (req.user.role === 'patient' ? req.user._id : partnerId);
+    const targetDoctorId = appointment 
+      ? (appointment.doctorId?.userId?._id || appointment.doctorId?.userId || appointment.doctorId)
+      : (req.user.role === 'doctor' ? req.user._id : partnerId);
 
     let conversation = await Conversation.findOne({
-      patientId: req.user._id,
-      appointmentId: appointment?._id || undefined,
+      patientId,
+      doctorId: targetDoctorId,
+      appointmentId: appointment ? appointment._id : undefined,
     });
 
     if (!conversation) {
       conversation = await Conversation.create({
-        patientId: req.user._id,
+        patientId,
         doctorId: targetDoctorId,
-        appointmentId: appointment?._id,
+        appointmentId: appointment ? appointment._id : undefined,
       });
     }
 

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import DoctorSidebar from '../../components/DoctorSidebar';
 import DoctorHeader from '../../components/DoctorHeader';
-import { getChatConversations, getChatMessages, sendChatMessage, markChatMessagesRead } from '../../services/api';
+import { getChatConversations, getChatMessages, getOrCreateChatConversation, sendChatMessage, markChatMessagesRead, getUserAppointments } from '../../services/api';
 import './DoctorChat.css';
 
 export default function DoctorChat() {
@@ -16,23 +16,53 @@ export default function DoctorChat() {
   const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // New States for Appointment Conversation initiation
+  const [availableAppointments, setAvailableAppointments] = useState([]);
+  const [showStartForm, setShowStartForm] = useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState('');
+  const [startingConversation, setStartingConversation] = useState(false);
+  const [startError, setStartError] = useState('');
 
   useEffect(() => {
-    const loadConversations = async () => {
+    const loadConversationsAndAppointments = async () => {
       try {
-        const { data } = await getChatConversations();
-        setConversations(data || []);
-        if (data?.length) {
-          setActiveConversation(data[0]);
+        const [{ data: conversationsData }, { data: appointmentsData }] = await Promise.all([
+          getChatConversations(),
+          getUserAppointments(),
+        ]);
+
+        const appointmentOptions = (appointmentsData || [])
+          .filter((appointment) => appointment.status !== 'cancelled')
+          .map((appointment) => {
+            const patientUserId = appointment.patientId?._id || appointment.patientId;
+            const patientName = appointment.patientId?.name || 'Patient';
+            const appointmentLabel = appointment.bookingId?.slotId?.startTime
+              ? `${patientName} • ${appointment.bookingId.slotId.startTime}`
+              : `${patientName} • Appointment ${appointment._id.slice(-4)}`;
+
+            return {
+              appointmentId: appointment._id,
+              patientUserId,
+              patientName,
+              appointmentLabel,
+            };
+          });
+
+        setConversations(conversationsData || []);
+        setAvailableAppointments(appointmentOptions);
+
+        if (conversationsData?.length) {
+          setActiveConversation(conversationsData[0]);
         }
       } catch (err) {
-        setError('Failed to load conversations.');
+        setError('Failed to load data.');
       } finally {
         setLoading(false);
       }
     };
 
-    loadConversations();
+    loadConversationsAndAppointments();
   }, []);
 
   useEffect(() => {
@@ -67,6 +97,37 @@ export default function DoctorChat() {
     }
   };
 
+  const handleStartConversation = async (e) => {
+    e.preventDefault();
+    if (!selectedAppointmentId) return;
+
+    setStartingConversation(true);
+    setStartError('');
+
+    try {
+      const selectedAppointment = availableAppointments.find((item) => item.appointmentId === selectedAppointmentId);
+      if (!selectedAppointment) {
+        throw new Error('Appointment not found');
+      }
+
+      // Reusing the service: passes the patient's ID to the endpoint parameter route
+      const { data } = await getOrCreateChatConversation(selectedAppointment.patientUserId, selectedAppointment.appointmentId);
+      const exists = conversations.some((conversation) => conversation._id === data._id);
+
+      if (!exists) {
+        setConversations((prev) => [data, ...prev]);
+      }
+
+      setActiveConversation(data);
+      setShowStartForm(false);
+      setSelectedAppointmentId('');
+    } catch (err) {
+      setStartError('Could not start a conversation.');
+    } finally {
+      setStartingConversation(false);
+    }
+  };
+
   const activePartner = useMemo(() => {
     if (!activeConversation) return null;
     return activeConversation.patientId?.name || 'Patient';
@@ -91,6 +152,38 @@ export default function DoctorChat() {
                 <p>Secure follow-up conversations</p>
               </div>
 
+              {/* Start Conversation Options Added Below */}
+              <button
+                type="button"
+                className="doctor-chat-start-button"
+                onClick={() => setShowStartForm((prev) => !prev)}
+                disabled={availableAppointments.length === 0}
+              >
+                {showStartForm ? 'Cancel' : 'Start new conversation'}
+              </button>
+
+              {showStartForm && (
+                <form className="doctor-chat-start-form" onSubmit={handleStartConversation}>
+                  <select
+                    value={selectedAppointmentId}
+                    onChange={(e) => setSelectedAppointmentId(e.target.value)}
+                  >
+                    <option value="">Select an appointment</option>
+                    {availableAppointments.map((appointment) => (
+                      <option key={appointment.appointmentId} value={appointment.appointmentId}>
+                        {appointment.appointmentLabel}
+                      </option>
+                    ))}
+                  </select>
+                  <button type="submit" disabled={startingConversation}>
+                    {startingConversation ? 'Starting...' : 'Start'}
+                  </button>
+                </form>
+              )}
+
+              {startError && <div className="doctor-chat-error">{startError}</div>}
+              <hr className="doctor-chat-divider" />
+
               {loading ? (
                 <div className="doctor-chat-loading">Loading conversations...</div>
               ) : error ? (
@@ -101,6 +194,9 @@ export default function DoctorChat() {
                 <div className="doctor-chat-list">
                   {conversations.map((conversation) => {
                     const partner = conversation.patientId?.name || 'Patient';
+                    const appointmentLabel = conversation.appointmentId?.bookingId?.slotId?.startTime
+                      ? `Appointment • ${conversation.appointmentId.bookingId.slotId.startTime}`
+                      : 'Appointment chat';
                     const isActive = activeConversation?._id === conversation._id;
                     return (
                       <button
@@ -112,7 +208,7 @@ export default function DoctorChat() {
                         <div className="doctor-chat-item-avatar">{partner.charAt(0).toUpperCase()}</div>
                         <div className="doctor-chat-item-details">
                           <strong>{partner}</strong>
-                          <span>{conversation.lastMessage || 'Start a conversation'}</span>
+                          <span>{appointmentLabel}</span>
                         </div>
                       </button>
                     );
@@ -128,7 +224,7 @@ export default function DoctorChat() {
                 <>
                   <div className="doctor-chat-panel-header">
                     <h3>{activePartner}</h3>
-                    <p>Respond securely from your portal</p>
+                    <p>{activeConversation?.appointmentId?.bookingId?.slotId?.startTime || 'Secure in-app messaging'}</p>
                   </div>
 
                   <div className="doctor-chat-messages">
