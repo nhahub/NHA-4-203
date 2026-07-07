@@ -3,6 +3,7 @@ const User   = require('../models/User');
 const Appointment = require('../models/Appointment');
 const Review = require('../models/Review');
 const LabResult = require('../models/LabResult');
+const Slot = require('../models/Slot');
 
 // POST /api/doctors (doctor only)
 const createDoctor = async (req, res) => {
@@ -62,7 +63,22 @@ const getDoctors = async (req, res) => {
     // Execute query and return results
     const doctors = await query;
 
-    res.status(200).json(doctors);
+    // Compute  available (unbooked) slot counts from Slot collection
+    const doctorIds = doctors.map((d) => d._id);
+    const slotCounts = await Slot.aggregate([
+      { $match: { doctorId: { $in: doctorIds }, isBooked: false } },
+      { $group: { _id: '$doctorId', count: { $sum: 1 } } },
+    ]);
+    const countMap = {};
+    slotCounts.forEach((s) => { countMap[s._id.toString()] = s.count; });
+
+    const doctorsWithSlots = doctors.map((d) => {
+      const obj = d.toObject();
+      obj.availableSlots = countMap[d._id.toString()] || 0;
+      return obj;
+    });
+
+    res.status(200).json(doctorsWithSlots);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

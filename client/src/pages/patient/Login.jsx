@@ -192,7 +192,7 @@ export default function Login() {
       </div>
 
       {/* Footer Credits */}
-      <p className="login-footer-credits">© 2024 EasyCare. Trusted Healthcare Technology.</p>
+      <p className="login-footer-credits">© 2026 EasyCare. Trusted Healthcare Technology.</p>
     </div>
   );
 }

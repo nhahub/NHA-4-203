@@ -110,7 +110,7 @@ export default function Register() {
             {/* Error Message */}
             {error && <div className="error-message">{error}</div>}
 
-            <form className="register-form" onSubmit={handleSubmit}>
+            <form className="register-form" onSubmit={handleSubmit} autoComplete="off">
               <div className="register-form-inputs">
                 
                 {/* Full Name */}
@@ -173,9 +173,10 @@ export default function Register() {
                       id="password"
                       className="register-field-input"
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="••••••••"
+                      placeholder="Enter your password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      autoComplete="new-password"
                       required
                     />
                     <button

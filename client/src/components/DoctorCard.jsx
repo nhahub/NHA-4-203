@@ -16,7 +16,7 @@ export default function DoctorCard({ doctor }) {
 
   const name = userId?.name || 'Doctor';
   const avatar = userId?.avatar || null;
-  const slotsCount = Array.isArray(availableSlots) ? availableSlots.length : (availableSlots || 0);
+  const slotsCount = typeof availableSlots === 'number' ? availableSlots : (Array.isArray(availableSlots) ? availableSlots.length : 0);
 
   return (
     <div className="doctor-card">
