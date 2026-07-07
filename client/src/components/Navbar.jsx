@@ -97,6 +97,9 @@ export default function Navbar() {
     return (
       <div className="navbar-actions-container">
         <div className="navbar-icon-group">
+          <button className="navbar-icon-btn" type="button" onClick={() => navigate('/patient/chat')}>
+            <span className="material-symbols-outlined">chat</span>
+          </button>
           <NotificationDropdown />
           <button className="navbar-icon-btn" type="button" onClick={handleSettingsClick}>
             <span className="material-symbols-outlined">settings</span>

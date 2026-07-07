@@ -1,0 +1,57 @@
+import React from 'react';
+import { useChat } from '../context/ChatContext';
+import './ChatBox.css';
+
+export default function ChatBox({ emptyStateText = 'Choose a conversation to start chatting.' }) {
+  const {
+    activeConversation,
+    messages,
+    currentUserId,
+    draft,
+    setDraft,
+    handleSendMessage,
+    getPartnerName,
+    getAppointmentLabel,
+  } = useChat();
+
+  if (!activeConversation) {
+    return (
+      <section className="chat-panel">
+        <div className="chat-empty-state">{emptyStateText}</div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="chat-panel">
+      <div className="chat-panel-header">
+        <h3>{getPartnerName(activeConversation)}</h3>
+        <p>{getAppointmentLabel(activeConversation)}</p>
+      </div>
+
+      <div className="chat-messages">
+        {messages.map((msg) => {
+          const isMine = msg.senderId?._id === currentUserId || msg.senderId === currentUserId;
+          return (
+            <div key={msg._id} className={`chat-bubble ${isMine ? 'mine' : 'other'}`}>
+                {!isMine && <div className="chat-item-avatar">
+                    {getPartnerName(activeConversation).charAt(0).toUpperCase()}
+                    </div>}
+              <p>{msg.text}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      <form className="chat-form" onSubmit={handleSendMessage}>
+        <input
+          type="text"
+          placeholder="Write a message"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+        />
+        <button type="submit">Send</button>
+      </form>
+    </section>
+  );
+}
