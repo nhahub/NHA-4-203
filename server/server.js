@@ -19,9 +19,10 @@ connectDB();
 
 const app = express();
 const server = http.createServer(app);
+const allowedOrigin = "http://localhost:3000"
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: allowedOrigin,
     methods: ['GET', 'POST'],
   },
 });

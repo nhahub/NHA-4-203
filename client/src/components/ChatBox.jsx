@@ -1,6 +1,8 @@
 import React from 'react';
 import { useChat } from '../context/ChatContext';
 import './ChatBox.css';
+import { useRef } from 'react';
+import { useEffect } from 'react';
 
 export default function ChatBox({ emptyStateText = 'Choose a conversation to start chatting.' }) {
   const {
@@ -13,6 +15,16 @@ export default function ChatBox({ emptyStateText = 'Choose a conversation to sta
     getPartnerName,
     getAppointmentLabel,
   } = useChat();
+
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({behaviour: "smooth"});
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   if (!activeConversation) {
     return (
@@ -41,6 +53,8 @@ export default function ChatBox({ emptyStateText = 'Choose a conversation to sta
             </div>
           );
         })}
+        {/* dummy element for scroll */}
+        <div ref={messagesEndRef} />
       </div>
 
       <form className="chat-form" onSubmit={handleSendMessage}>
