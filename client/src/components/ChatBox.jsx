@@ -19,7 +19,7 @@ export default function ChatBox({ emptyStateText = 'Choose a conversation to sta
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({behaviour: "smooth"});
+    messagesEndRef.current?.scrollIntoView({behaviour: "smooth", block: "nearest"});
   };
 
   useEffect(() => {
