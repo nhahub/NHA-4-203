@@ -21,6 +21,7 @@ import MedicalRecords from './pages/patient/MedicalRecords';
 import UploadResults from './pages/patient/UploadResults';
 import MapSearch from './pages/patient/MapSearch';
 import MyAppointments from './pages/patient/MyAppointments';
+import Chat from './pages/patient/Chat';
 
 // Doctor pages (protected)
 import DoctorDashboard from './pages/doctor/DoctorDashboard';
@@ -29,6 +30,7 @@ import DoctorPatientRecords from './pages/doctor/DoctorPatientRecords';
 import DoctorResults from './pages/doctor/DoctorResults';
 import DoctorDiagnosis from './pages/doctor/DoctorDiagnosis';
 import DoctorStats from './pages/doctor/DoctorStats';
+import DoctorChat from './pages/doctor/DoctorChat';
 
 // Admin pages (protected)
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -118,6 +120,14 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/patient/chat"
+        element={
+          <ProtectedRoute roles={['patient']}>
+            <Chat />
+          </ProtectedRoute>
+        }
+      />
 
       {/* ─── Doctor Routes ──────────────── */}
       <Route
@@ -165,6 +175,14 @@ export default function App() {
         element={
           <ProtectedRoute roles={['doctor']}>
             <DoctorStats />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/doctor/chat"
+        element={
+          <ProtectedRoute roles={['doctor']}>
+            <DoctorChat />
           </ProtectedRoute>
         }
       />

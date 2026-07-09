@@ -122,8 +122,8 @@ const updateAppointmentStatus = async (req, res) => {
   }
 };
 
-// DELETE /api/appointments/:id (doctor or patient — cancelled only)
-// Permanently removes a cancelled appointment from the system
+// DELETE /api/appointments/:id (doctor or patient — completed or cancelled only)
+// Permanently removes a completed or cancelled appointment from the system
 const deleteAppointment = async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id);
@@ -132,9 +132,9 @@ const deleteAppointment = async (req, res) => {
       return res.status(404).json({ message: 'Appointment not found' });
     }
 
-    // Only cancelled appointments can be deleted
-    if (appointment.status !== 'cancelled') {
-      return res.status(400).json({ message: 'Only cancelled appointments can be deleted' });
+    // Only completed or cancelled appointments can be deleted
+    if (!['completed', 'cancelled'].includes(appointment.status)) {
+      return res.status(400).json({ message: 'Only completed or cancelled appointments can be deleted' });
     }
 
     // Patient can only delete their own cancelled appointments

@@ -6,7 +6,10 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const http = require('http');
+const { Server } = require('socket.io');
 const connectDB = require('./config/db');
+const initializeSocket = require('./socket');
 
 // Load environment variables from .env file
 dotenv.config();
@@ -15,6 +18,14 @@ dotenv.config();
 connectDB();
 
 const app = express();
+const server = http.createServer(app);
+const allowedOrigin = "http://localhost:3000"
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigin,
+    methods: ['GET', 'POST'],
+  },
+});
 
 // Middleware setup
 app.use(cors()); // Allow cross-origin requests from frontend
@@ -34,12 +45,15 @@ app.use('/api/prescriptions', require('./routes/prescriptionRoutes'));
 app.use('/api/results', require('./routes/resultRoutes'));
 app.use('/api/reviews', require('./routes/reviewRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
+
+initializeSocket(io);
 
 const PORT = process.env.PORT || 5000;
 
 // Start the server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`EasyCare server running on port ${PORT}`);
 });
 

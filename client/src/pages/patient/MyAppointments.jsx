@@ -14,6 +14,7 @@ export default function MyAppointments() {
   const [activeTab, setActiveTab] = useState('upcoming');
   const [expandedId, setExpandedId] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
   const [cancelModal, setCancelModal] = useState({ isOpen: false, appointment: null });
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, appointmentId: null });
 
@@ -59,12 +60,16 @@ export default function MyAppointments() {
   const handleDeleteConfirm = async () => {
     const id = deleteModal.appointmentId;
     if (!id) return;
+
+    setDeletingId(id);
     try {
       await deleteAppointment(id);
       setDeleteModal({ isOpen: false, appointmentId: null });
       await fetchAppointments();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to delete appointment.');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -257,13 +262,14 @@ export default function MyAppointments() {
                             {cancellingId === appt._id ? 'Cancelling...' : 'Cancel'}
                           </button>
                         )}
-                        {appt.status === 'cancelled' && (
+                        {(appt.status === 'completed' || appt.status === 'cancelled') && (
                           <button 
                             className="appointment-btn-cancel-action"
                             style={{ borderColor: '#ef4444', color: '#ef4444' }}
                             onClick={() => handleDeleteClick(appt._id)}
+                            disabled={deletingId === appt._id}
                           >
-                            Delete
+                            {deletingId === appt._id ? 'Deleting...' : 'Delete'}
                           </button>
                         )}
                         <button 
@@ -368,15 +374,16 @@ export default function MyAppointments() {
 
       <AdminModal
         isOpen={deleteModal.isOpen}
-        title="Delete Appointment Record"
+        title="Delete Completed Appointment"
         onClose={() => setDeleteModal({ isOpen: false, appointmentId: null })}
         onConfirm={handleDeleteConfirm}
         confirmText="Delete Record"
         cancelText="Cancel"
         isDangerous={true}
+        isLoading={deletingId === deleteModal.appointmentId}
       >
         <p>
-          Are you sure you want to permanently delete this cancelled appointment from your history?
+          Are you sure you want to permanently delete this completed appointment from your history?
         </p>
         <p className="admin-modal-subtext">
           This action will remove the record from your view and cannot be undone.

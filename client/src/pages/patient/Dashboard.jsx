@@ -119,6 +119,16 @@ export default function Dashboard() {
               <h3 className="stat-value">{results.length}</h3>
             </div>
           </div>
+
+          <div className="stat-card purple-theme" onClick={() => navigate('/patient/chat')}>
+            <div className="stat-icon-wrapper">
+              <span className="material-symbols-outlined icon-fill">chat</span>
+            </div>
+            <div className="stat-info">
+              <p className="stat-label">Messages</p>
+              <h3 className="stat-value">Chat</h3>
+            </div>
+          </div>
         </section>
 
         {/* Loading & Error States */}

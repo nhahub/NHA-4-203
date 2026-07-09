@@ -324,13 +324,6 @@ export default function UploadResults() {
                     </div>
                     <div className="upload-result-actions" style={{ display: 'flex', gap: '8px' }}>
                       <button
-                        className="upload-result-action"
-                        title="View file"
-                        onClick={() => window.open(`http://localhost:5000/${res.fileUrl}`)}
-                      >
-                        <span className="material-symbols-outlined">visibility</span>
-                      </button>
-                      <button
                         className="upload-result-action upload-result-delete"
                         title="Delete upload"
                         onClick={() => handleDeleteClick(res)}
