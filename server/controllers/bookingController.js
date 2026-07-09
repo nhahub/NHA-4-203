@@ -3,6 +3,7 @@ const Notification = require('../models/Notification');
 const Slot = require('../models/Slot');
 const Booking = require('../models/Booking');
 const Appointment = require('../models/Appointment');
+const Doctor = require('../models/Doctor'); // Need Doctor to resolve the linked User._id for notifications
 const User = require('../models/User'); // Need User to get patient name for notification
 
 // POST /api/bookings (patient only)
@@ -52,10 +53,19 @@ const createBooking = async (req, res) => {
     }], { session });
 
     // --- TRIGGER NOTIFICATION ---
-    // Notify the doctor about the new appointment
+    // Notify the doctor about the new appointment.
+    // `doctorId` here is the Doctor document's _id, but Notification.user must be a User._id
+    // (that's what getNotifications matches against via req.user._id) — so we resolve the
+    // Doctor's linked userId first, same pattern used in appointmentController.js.
     const patientUser = await User.findById(req.user._id).session(session);
+    const doctorRecord = await Doctor.findById(doctorId).session(session);
+    if (!doctorRecord) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
     await Notification.create([{
-      user: doctorId,
+      user: doctorRecord.userId,
       title: 'New Appointment Booked',
       message: `${patientUser.name} has booked a new appointment.`,
       type: 'appointment',
