@@ -461,6 +461,47 @@
   margin-bottom: 24px;
 }
 
+.availability-date-picker-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.availability-date-input {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--outline-variant);
+  background: var(--surface-container-low);
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.availability-date-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.availability-date-chip {
+  border: 1px solid var(--outline-variant);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.availability-date-chip.active {
+  border-color: var(--primary);
+  background: rgba(10, 110, 189, 0.08);
+  color: var(--primary);
+  font-weight: 700;
+}
+
 .slots-capsules-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));

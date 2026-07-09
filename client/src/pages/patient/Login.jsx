@@ -20,6 +20,16 @@ export default function Login() {
     }
   }, [isAuthenticated, user, navigate]);
 
+  useEffect(() => {
+    const hadDarkTheme = document.body.classList.contains('dark-theme');
+    document.body.classList.remove('dark-theme');
+    return () => {
+      if (hadDarkTheme) {
+        document.body.classList.add('dark-theme');
+      }
+    };
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');

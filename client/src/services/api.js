@@ -56,6 +56,7 @@ export const getUserBookings = () => API.get('/bookings/user');
 export const getUserAppointments = () => API.get('/appointments/user');
 export const updateAppointmentStatus = (id, status) =>
   API.put(`/appointments/${id}/status`, { status });
+export const deleteAppointment = (id) => API.delete(`/appointments/${id}`);
 
 // Records
 export const createRecord = (data) => API.post('/records', data);

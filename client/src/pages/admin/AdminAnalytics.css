@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap');
 
-.analytics-main {
+.admin-analytics-main {
   margin-left: 256px;
   padding: 96px 32px 48px;
   min-height: 100vh;
@@ -56,7 +56,7 @@
 }
 
 .btn-outline-pill {
-  background: white;
+  background: var(--surface);
   border: 1px solid #c1c7d3;
   color: #1A1F36;
 }
@@ -85,7 +85,7 @@
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  background: white;
+  background: var(--surface);
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -364,9 +364,8 @@
 }
 
 .geo-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: var(--surface);
+  border: 1px solid var(--outline-variant);
   border-radius: 12px;
   overflow: hidden;
   display: flex;
@@ -375,19 +374,20 @@
 
 .geo-header {
   padding: 24px;
-  border-bottom: 1px solid #c1c7d3;
+  background: var(--surface);
+  border-bottom: 1px solid var(--outline-variant);
 }
 
 .geo-header h4 {
   font-size: 24px;
   font-weight: 600;
   margin: 0;
-  color: #1A1F36;
+  color: var(--color-primary-text);
 }
 
 .geo-header p {
   font-size: 12px;
-  color: #6B7280;
+  color: var(--color-secondary-text);
   margin: 4px 0 0 0;
 }
 
@@ -395,16 +395,16 @@
   flex: 1;
   min-height: 350px;
   position: relative;
-  background-color: #f1f5f9;
+  background-color: var(--surface-container-low);
 }
-
 
 .geo-legend {
   padding: 16px;
-  background-color: white;
+  background-color: var(--surface);
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+  border-top: 1px solid var(--outline-variant);
 }
 
 .geo-legend-item {
@@ -423,19 +423,18 @@
   font-size: 10px;
   font-weight: 700;
   margin: 0;
-  color: #1A1F36;
+  color: var(--color-primary-text);
 }
 
 .geo-legend-item p {
   font-size: 10px;
-  color: #6B7280;
+  color: var(--color-secondary-text);
   margin: 0;
 }
 
 .top-doctors-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: var(--surface);
+  border: 1px solid var(--outline-variant);
   padding: 24px;
   border-radius: 12px;
 }
@@ -450,10 +449,9 @@
 .top-docs-header h4 {
   font-size: 24px;
   font-weight: 600;
-  color: #1A1F36;
+  color: var(--color-primary-text);
   margin: 0;
 }
-
 
 .top-docs-table-wrap {
   overflow-x: auto;
@@ -469,17 +467,18 @@
   padding-bottom: 16px;
   font-size: 14px;
   font-weight: 600;
-  color: #6B7280;
-  border-bottom: 1px solid #c1c7d3;
+  color: var(--color-secondary-text);
+  border-bottom: 1px solid var(--outline-variant);
 }
 
 .top-docs-table td {
   padding: 16px 0;
-  border-bottom: 1px solid rgba(193, 199, 211, 0.3);
+  border-bottom: 1px solid var(--outline-variant);
+  color: var(--color-primary-text);
 }
 
 .top-docs-table tr:hover {
-  background-color: #f2f3fb;
+  background-color: var(--surface-container-low);
 }
 
 .top-doc-info {
@@ -503,11 +502,11 @@
 
 .top-doc-name {
   font-weight: 700;
-  color: #1A1F36;
+  color: var(--color-primary-text);
   font-size: 14px;
 }
 
-.color-secondary-text-light-color { color: #6B7280; }
+.color-secondary-text-light-color { color: var(--color-secondary-text); }
 .font-semibold { font-weight: 600; }
 
 .flex-rating {
@@ -548,9 +547,8 @@
 
 /* ── Interactive Chart Styles ── */
 .analytics-tooltip {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border: 1px solid var(--outline-variant);
   border-radius: 10px;
   padding: 10px 14px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
@@ -559,7 +557,7 @@
 
 .analytics-tooltip-label {
   font-weight: 700;
-  color: #1A1F36;
+  color: var(--color-primary-text);
   margin: 0 0 4px 0;
   font-size: 13px;
 }
@@ -600,6 +598,29 @@
   border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   font-family: 'Manrope', sans-serif;
+  background: var(--surface);
+  color: var(--color-primary-text);
+}
+
+.geo-map-popup {
+  font-family: 'Manrope', sans-serif;
+  min-width: 140px;
+}
+
+.geo-map-popup-name {
+  font-size: 14px;
+  color: var(--surface-tint);
+}
+
+.geo-map-popup-specialty {
+  font-size: 12px;
+  color: var(--color-secondary-text);
+}
+
+.geo-map-popup-clinic {
+  font-size: 11px;
+  color: var(--color-secondary-text);
+  opacity: 0.8;
 }
 
 /* Recharts tooltip cursor fix */

@@ -294,7 +294,7 @@
 .home-search-input {
   width: 100%;
   padding: 14px 16px 14px 44px;
-  background: white;
+  background: var(--surface);
   border: 1px solid #e2e8f0;
   border-radius: 16px;
   font-size: 15px;
@@ -333,7 +333,7 @@
 }
 
 .home-hero-stat {
-  background: white;
+  background: var(--surface);
   border-radius: 16px;
   padding: 16px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
@@ -360,7 +360,7 @@
 /* ─── Features Section ───────────────────── */
 .home-features {
   padding: 96px 0;
-  background: white;
+  background: var(--surface);
 }
 
 .home-features-inner {
@@ -412,7 +412,7 @@
 .home-feature-icon {
   width: 64px;
   height: 64px;
-  background: white;
+  background: var(--surface);
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -585,7 +585,7 @@
 }
 
 .home-cta-btn-white {
-  background: white;
+  background: var(--surface);
   color: var(--admin-sidebar);
   padding: 16px 40px;
   border-radius: 9999px;
@@ -711,7 +711,7 @@
 
 .home-footer-newsletter-input input {
   flex: 1;
-  background: white;
+  background: var(--surface);
   border: 1px solid #e2e8f0;
   border-radius: 8px 0 0 8px;
   padding: 8px 16px;

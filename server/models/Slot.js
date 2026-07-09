@@ -6,6 +6,11 @@ const slotSchema = new mongoose.Schema({
     ref: 'Doctor',
     required: true,
   },
+  date: {
+    type: String,
+    required: true,
+    default: () => new Date().toISOString().slice(0, 10),
+  },
   startTime: {
     type: String,
     required: true,

@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap');
 
-.appointments-main {
+.admin-appointments-main {
   margin-left: 256px;
   padding: 96px 32px 48px;
   min-height: 100vh;
@@ -54,7 +54,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: white;
+  background: var(--surface);
   border: 1px solid rgba(0, 85, 150, 0.2);
   color: #005596;
   padding: 10px 20px;
@@ -200,7 +200,7 @@
 
 /* Filters & Table Section */
 .appointments-table-wrapper {
-  background: white;
+  background: var(--surface);
   border-radius: 32px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   border: 1px solid #f1f5f9;
@@ -237,7 +237,7 @@
 .filter-group select,
 .filter-group input {
   width: 100%;
-  background: white;
+  background: var(--surface);
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 10px 16px;
@@ -305,7 +305,7 @@
   font-weight: 500;
   color: #64748b;
   border-bottom: 1px solid #f1f5f9;
-  background: white;
+  background: var(--surface);
 }
 
 .appointments-table td {
@@ -459,7 +459,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: white;
+  background: var(--surface);
 }
 
 .table-pagination p {
@@ -492,7 +492,7 @@
   cursor: pointer;
   transition: all 0.2s;
   border: 1px solid #e2e8f0;
-  background: white;
+  background: var(--surface);
   color: #64748b;
 }
 
@@ -520,7 +520,7 @@
 }
 
 @media (max-width: 1024px) {
-  .appointments-main {
+  .admin-appointments-main {
     margin-left: 0;
     padding-left: 16px;
     padding-right: 16px;

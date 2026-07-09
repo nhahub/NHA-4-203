@@ -80,6 +80,55 @@
   color: var(--color-primary-text);
 }
 
+.book-date-picker-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.book-date-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--color-secondary-text);
+  text-transform: uppercase;
+}
+
+.book-date-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  color: var(--color-primary-text);
+  background: var(--surface);
+}
+
+.book-date-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.book-date-chip {
+  padding: 8px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--outline-variant);
+  background: var(--surface);
+  color: var(--color-secondary-text);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.book-date-chip.active {
+  border-color: var(--primary);
+  background: rgba(0, 85, 150, 0.08);
+  color: var(--primary);
+  font-weight: 600;
+}
+
 .book-slots-grid {
   display: flex;
   flex-wrap: wrap;

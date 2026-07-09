@@ -15,6 +15,7 @@
 
 .logout-modal {
   background: var(--surface, #fff);
+  border: 1px solid var(--outline-variant, #e0e2e9);
   border-radius: 16px;
   padding: 40px 32px 32px;
   max-width: 400px;
@@ -28,7 +29,7 @@
   width: 64px;
   height: 64px;
   margin: 0 auto 20px;
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.1);
   border-radius: 50%;
   display: flex;
   align-items: center;

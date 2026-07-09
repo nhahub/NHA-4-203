@@ -1,9 +1,10 @@
 .settings-container {
   background: var(--surface, #ffffff);
+  border: 1px solid var(--outline-variant, transparent);
   border-radius: var(--radius-xl, 16px);
   box-shadow: var(--shadow, 0 1px 3px rgba(0, 0, 0, 0.1));
   overflow: hidden;
-  margin-top: 40px;
+  margin-top: 0;
   font-family: 'DM Sans', 'Manrope', sans-serif;
 }
 

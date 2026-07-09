@@ -15,7 +15,10 @@ export default function DoctorCard({ doctor }) {
   } = doctor;
 
   const name = userId?.name || 'Doctor';
-  const avatar = userId?.avatar || null;
+  const avatarPath = userId?.profilePicture || '';
+  const avatar = avatarPath
+    ? (avatarPath.startsWith('http') ? avatarPath : `http://localhost:5000${avatarPath}`)
+    : null;
   const slotsCount = typeof availableSlots === 'number' ? availableSlots : (Array.isArray(availableSlots) ? availableSlots.length : 0);
 
   return (

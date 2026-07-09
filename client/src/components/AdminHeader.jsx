@@ -1,10 +1,14 @@
+import { useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
+import { useTheme } from '../context/ThemeContext';
 import './AdminHeader.css';
 
 const API_BASE = 'http://localhost:5000';
 
 export default function AdminHeader({ onMenuClick }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="admin-header">
@@ -14,6 +18,22 @@ export default function AdminHeader({ onMenuClick }) {
         </button>
       </div>
       <div className="admin-header-right">
+        <button
+          className="admin-header-icon-btn"
+          onClick={toggleTheme}
+          title="Toggle Theme"
+        >
+          <span className="material-symbols-outlined">
+            {theme === 'light' ? 'dark_mode' : 'light_mode'}
+          </span>
+        </button>
+        <button
+          className="admin-header-icon-btn"
+          onClick={() => navigate('/admin/settings')}
+          title="Settings"
+        >
+          <span className="material-symbols-outlined">settings</span>
+        </button>
         
         <div className="admin-header-divider"></div>
         

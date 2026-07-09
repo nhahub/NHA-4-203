@@ -190,7 +190,10 @@ export default function Doctors() {
               {filteredDoctors.slice(0, visibleCount).map((doc) => {
                 const name = doc.userId?.name || 'Doctor';
                 const specialty = doc.specialty || 'General Practitioner';
-                const avatar = doc.userId?.avatar;
+                const avatarPath = doc.userId?.profilePicture || '';
+                const avatar = avatarPath
+                  ? (avatarPath.startsWith('http') ? avatarPath : `http://localhost:5000${avatarPath}`)
+                  : null;
                 const experience = doc.experience || 5;
                 const clinic = doc.clinic || 'General Medical Clinic';
                 const rating = doc.rating !== undefined ? doc.rating : 0;

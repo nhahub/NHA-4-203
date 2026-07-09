@@ -34,6 +34,7 @@ export default function DoctorProfile() {
   const [error, setError] = useState('');
 
   // Selected Booking Info
+  const [selectedDate, setSelectedDate] = useState('');
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [visitReason, setVisitReason] = useState('General Consultation');
   const [consultType, setConsultType] = useState('In-Clinic');
@@ -66,7 +67,9 @@ export default function DoctorProfile() {
         
         // Filter out booked slots
         const available = (slotRes.data.slots || slotRes.data || []).filter(s => !s.isBooked);
+        const availableDates = [...new Set(available.map((slot) => slot.date).filter(Boolean))].sort();
         setSlots(available);
+        setSelectedDate((prev) => (prev && availableDates.includes(prev) ? prev : (availableDates[0] || '')));
       } catch (err) {
         console.error('Failed to load profile details:', err);
         setError('Failed to load doctor profile.');
@@ -107,7 +110,9 @@ export default function DoctorProfile() {
       // Refresh available slots
       const slotRes = await getSlots(id);
       const available = (slotRes.data.slots || slotRes.data || []).filter(s => !s.isBooked);
+      const availableDates = [...new Set(available.map((slot) => slot.date).filter(Boolean))].sort();
       setSlots(available);
+      setSelectedDate((prev) => (prev && availableDates.includes(prev) ? prev : (availableDates[0] || '')));
       
       setTimeout(() => {
         navigate('/patient/appointments');
@@ -177,12 +182,22 @@ export default function DoctorProfile() {
 
   const name = doctor.userId?.name || 'Doctor';
   const specialty = doctor.specialty || 'General Practitioner';
-  const avatar = doctor.userId?.avatar;
+  const avatarPath = doctor.userId?.profilePicture || '';
+  const avatar = avatarPath
+    ? (avatarPath.startsWith('http') ? avatarPath : `http://localhost:5000${avatarPath}`)
+    : null;
   const experience = doctor.experience || 5;
   const clinicName = doctor.clinic || 'City Health Center';
   const rating = doctor.rating !== undefined ? doctor.rating : 0;
   const reviewsCount = doctor.reviewsCount || 0;
   const isVerified = doctor.isVerified;
+  const availableDates = [...new Set(slots.map((slot) => slot.date).filter(Boolean))].sort();
+  const visibleSlots = slots.filter((slot) => slot.date === selectedDate);
+  const formatDateLabel = (value) => {
+    if (!value) return '';
+    const date = new Date(`${value}T00:00:00`);
+    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  };
 
   return (
     <div className="doctor-profile-page">
@@ -335,25 +350,70 @@ export default function DoctorProfile() {
               {activeTab === 'schedule' && (
                 <div className="tab-content-panel fade-in">
                   <div className="profile-schedule-box">
-                    <h3 className="section-block-title">Weekly Slots Schedule</h3>
-                    <p className="schedule-helper-text">Select an active slot. The details will update in the booking card on the right.</p>
-                    
-                    {slots.length > 0 ? (
-                      <div className="slots-capsules-grid">
-                        {slots.map((slot) => {
-                          const isSelected = selectedSlot?._id === slot._id;
-                          return (
-                            <button 
-                              key={slot._id}
-                              className={`slot-time-capsule ${isSelected ? 'selected' : ''}`}
-                              onClick={() => setSelectedSlot(slot)}
+                    <h3 className="section-block-title">Availability Calendar</h3>
+                    <p className="schedule-helper-text">Choose a day first, then pick an open slot for that date.</p>
+
+                    {availableDates.length > 0 ? (
+                      <>
+                        <div className="availability-date-picker-row">
+                          <label className="booking-field-label">Select a day</label>
+                          <input
+                            type="date"
+                            className="availability-date-input"
+                            value={selectedDate}
+                            onChange={(e) => {
+                              setSelectedDate(e.target.value);
+                              setSelectedSlot(null);
+                            }}
+                          />
+                        </div>
+
+                        <div className="availability-date-chips">
+                          {availableDates.map((date) => (
+                            <button
+                              key={date}
+                              type="button"
+                              className={`availability-date-chip ${selectedDate === date ? 'active' : ''}`}
+                              onClick={() => {
+                                setSelectedDate(date);
+                                setSelectedSlot(null);
+                              }}
                             >
-                              <span className="material-symbols-outlined">schedule</span>
-                              <span>{slot.startTime} - {slot.endTime}</span>
+                              {formatDateLabel(date)}
                             </button>
-                          );
-                        })}
-                      </div>
+                          ))}
+                        </div>
+
+                        {selectedDate ? (
+                          visibleSlots.length > 0 ? (
+                            <div className="slots-capsules-grid">
+                              {visibleSlots.map((slot) => {
+                                const isSelected = selectedSlot?._id === slot._id;
+                                return (
+                                  <button
+                                    key={slot._id}
+                                    className={`slot-time-capsule ${isSelected ? 'selected' : ''}`}
+                                    onClick={() => setSelectedSlot(slot)}
+                                  >
+                                    <span className="material-symbols-outlined">schedule</span>
+                                    <span>{slot.startTime} - {slot.endTime}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <div className="schedule-empty-state">
+                              <span className="material-symbols-outlined">event_busy</span>
+                              <p>No available slots for {formatDateLabel(selectedDate)}.</p>
+                            </div>
+                          )
+                        ) : (
+                          <div className="schedule-empty-state">
+                            <span className="material-symbols-outlined">event_busy</span>
+                            <p>Select a date to view available slots.</p>
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div className="schedule-empty-state">
                         <span className="material-symbols-outlined">event_busy</span>
@@ -486,7 +546,9 @@ export default function DoctorProfile() {
                         <span className="material-symbols-outlined text-blue">event_available</span>
                         <div className="preview-text">
                           <p className="preview-label">Selected Schedule Slot</p>
-                          <p className="preview-value">{selectedSlot.startTime} - {selectedSlot.endTime}</p>
+                          <p className="preview-value">
+                            {selectedDate ? `${formatDateLabel(selectedDate)} • ` : ''}{selectedSlot.startTime} - {selectedSlot.endTime}
+                          </p>
                         </div>
                         <button className="btn-clear-slot" onClick={() => setSelectedSlot(null)}>
                           <span className="material-symbols-outlined">close</span>

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getUserAppointments, updateAppointmentStatus } from '../../services/api';
+import { getUserAppointments, updateAppointmentStatus, deleteAppointment } from '../../services/api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import AdminModal from '../../components/AdminModal';
 import './MyAppointments.css';
 
 export default function MyAppointments() {
@@ -13,6 +14,8 @@ export default function MyAppointments() {
   const [activeTab, setActiveTab] = useState('upcoming');
   const [expandedId, setExpandedId] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
+  const [cancelModal, setCancelModal] = useState({ isOpen: false, appointment: null });
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, appointmentId: null });
 
   const fetchAppointments = async () => {
     try {
@@ -29,11 +32,18 @@ export default function MyAppointments() {
     fetchAppointments();
   }, []);
 
-  const handleCancel = async (id) => {
-    if (!window.confirm('Are you sure you want to cancel this appointment?')) return;
+  const handleCancelClick = (appointment) => {
+    setCancelModal({ isOpen: true, appointment });
+  };
+
+  const handleCancelConfirm = async () => {
+    const id = cancelModal.appointment?._id;
+    if (!id) return;
+
     setCancellingId(id);
     try {
       await updateAppointmentStatus(id, 'cancelled');
+      setCancelModal({ isOpen: false, appointment: null });
       await fetchAppointments();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to cancel appointment.');
@@ -42,10 +52,27 @@ export default function MyAppointments() {
     }
   };
 
+  const handleDeleteClick = (id) => {
+    setDeleteModal({ isOpen: true, appointmentId: id });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const id = deleteModal.appointmentId;
+    if (!id) return;
+    try {
+      await deleteAppointment(id);
+      setDeleteModal({ isOpen: false, appointmentId: null });
+      await fetchAppointments();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to delete appointment.');
+    }
+  };
+
   const getFilteredAppointments = () => {
+    const now = new Date();
     if (activeTab === 'upcoming') {
       return appointments.filter(
-        (a) => a.status === 'confirmed' || a.status === 'pending'
+        (a) => (a.status === 'confirmed' || a.status === 'pending')
       );
     } else if (activeTab === 'past') {
       return appointments.filter((a) => a.status === 'completed');
@@ -81,7 +108,9 @@ export default function MyAppointments() {
     ? `${nextAppointment.doctorId?.specialty || 'Doctor'} on ${nextAppointment.dateValue.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
     : 'None scheduled';
 
-  const formatCardDate = (dateString) => {
+  const formatCardDate = (appointment) => {
+    // Use bookedAt from booking as the appointment date
+    const dateString = appointment.bookingId?.bookedAt || appointment.createdAt;
     if (!dateString) return 'Date not set';
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -92,8 +121,8 @@ export default function MyAppointments() {
 
   const formatCardTime = (appointment) => {
     const slot = appointment.bookingId?.slotId;
-    if (slot) {
-      return `${slot.startTime} - ${slot.endTime}`;
+    if (slot?.startTime) {
+      return slot.endTime ? `${slot.startTime} – ${slot.endTime}` : slot.startTime;
     }
     return 'Time not set';
   };
@@ -143,9 +172,11 @@ export default function MyAppointments() {
               const docUser = doc.userId || {};
               const docName = docUser.name || 'Doctor';
               const docSpecialty = doc.specialty || 'General Specialist';
-              const docAvatar = docUser.avatar;
-              const dateObj = appt.bookingId?.bookedAt || appt.createdAt;
-              const formattedDate = formatCardDate(dateObj);
+              const docAvatarPath = docUser.profilePicture || '';
+              const docAvatar = docAvatarPath
+                ? (docAvatarPath.startsWith('http') ? docAvatarPath : `http://localhost:5000${docAvatarPath}`)
+                : null;
+              const formattedDate = formatCardDate(appt);
               const formattedTime = formatCardTime(appt);
               const isExpanded = expandedId === appt._id;
 
@@ -220,10 +251,19 @@ export default function MyAppointments() {
                         {(appt.status === 'confirmed' || appt.status === 'pending') && (
                           <button 
                             className="appointment-btn-cancel-action"
-                            onClick={() => handleCancel(appt._id)}
+                            onClick={() => handleCancelClick(appt)}
                             disabled={cancellingId === appt._id}
                           >
                             {cancellingId === appt._id ? 'Cancelling...' : 'Cancel'}
+                          </button>
+                        )}
+                        {appt.status === 'cancelled' && (
+                          <button 
+                            className="appointment-btn-cancel-action"
+                            style={{ borderColor: '#ef4444', color: '#ef4444' }}
+                            onClick={() => handleDeleteClick(appt._id)}
+                          >
+                            Delete
                           </button>
                         )}
                         <button 
@@ -280,10 +320,10 @@ export default function MyAppointments() {
         )}
 
         {/* Sidebar / Supplemental Info (Asymmetric Layout at the Bottom) */}
-        <div className="my-appointments-supplemental-row">
+        <div className="my-appointments-supplemental-row" style={{ gridTemplateColumns: '1fr' }}>
           
           {/* Telehealth Promo */}
-          <div className="telehealth-consultations-banner">
+          <div className="telehealth-consultations-banner" style={{ width: '100%' }}>
             <div className="telehealth-banner-icon-box">
               <span className="material-symbols-outlined">health_and_safety</span>
             </div>
@@ -302,31 +342,46 @@ export default function MyAppointments() {
             </div>
           </div>
 
-          {/* Stats Card */}
-          <div className="appointment-sidebar-stats-card">
-            <h4 className="sidebar-stats-heading">Appointment Stats</h4>
-            
-            <div className="stats-metric-grid">
-              <div className="stats-metric-box">
-                <p className="stats-metric-label">Upcoming</p>
-                <p className="stats-metric-value text-blue">{String(upcomingCount).padStart(2, '0')}</p>
-              </div>
-              <div className="stats-metric-box">
-                <p className="stats-metric-label">Total Visits</p>
-                <p className="stats-metric-value">{String(totalVisits).padStart(2, '0')}</p>
-              </div>
-            </div>
-
-            <div className="stats-next-appointment-banner">
-              <span className="material-symbols-outlined text-secondary">event_available</span>
-              <p className="stats-next-appointment-text">Next: {nextAppointmentText}</p>
-            </div>
-          </div>
-
         </div>
 
       </main>
       <Footer />
+
+      <AdminModal
+        isOpen={cancelModal.isOpen}
+        title="Cancel Appointment"
+        onClose={() => setCancelModal({ isOpen: false, appointment: null })}
+        onConfirm={handleCancelConfirm}
+        confirmText="Cancel Appointment"
+        cancelText="Keep Appointment"
+        isDangerous={true}
+        isLoading={!!cancellingId}
+      >
+        <p>
+          Are you sure you want to cancel your appointment with{' '}
+          <strong>Dr. {cancelModal.appointment?.doctorId?.userId?.name || 'your doctor'}</strong>?
+        </p>
+        <p className="admin-modal-subtext">
+          This action cannot be undone. You can book a new appointment anytime.
+        </p>
+      </AdminModal>
+
+      <AdminModal
+        isOpen={deleteModal.isOpen}
+        title="Delete Appointment Record"
+        onClose={() => setDeleteModal({ isOpen: false, appointmentId: null })}
+        onConfirm={handleDeleteConfirm}
+        confirmText="Delete Record"
+        cancelText="Cancel"
+        isDangerous={true}
+      >
+        <p>
+          Are you sure you want to permanently delete this cancelled appointment from your history?
+        </p>
+        <p className="admin-modal-subtext">
+          This action will remove the record from your view and cannot be undone.
+        </p>
+      </AdminModal>
     </div>
   );
 }

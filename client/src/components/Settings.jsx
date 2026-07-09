@@ -16,6 +16,7 @@ import DoctorHeader from './DoctorHeader';
 // Admin wrappers
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
+import '../pages/admin/AdminDashboard.css';
 
 const API_BASE = 'http://localhost:5000';
 
@@ -52,6 +53,7 @@ export default function Settings() {
 
   // Doctor Availability Slots State
   const [slots, setSlots] = useState([]);
+  const [newSlotDate, setNewSlotDate] = useState(new Date().toISOString().slice(0, 10));
   const [newSlotStart, setNewSlotStart] = useState('');
   const [newSlotEnd, setNewSlotEnd] = useState('');
   const [slotsLoading, setSlotsLoading] = useState(false);
@@ -102,6 +104,12 @@ export default function Settings() {
     if (!profilePicture) return '';
     if (profilePicture.startsWith('http')) return profilePicture;
     return `${API_BASE}${profilePicture}`;
+  };
+
+  const formatSlotDate = (value) => {
+    if (!value) return 'No date';
+    const date = new Date(`${value}T00:00:00`);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   const handleAvatarChange = async (e) => {
@@ -231,18 +239,20 @@ export default function Settings() {
 
   const handleAddSlot = async (e) => {
     e.preventDefault();
-    if (!newSlotStart || !newSlotEnd) {
-      setSlotsMessage({ text: 'Please enter both start and end times.', type: 'error' });
+    if (!newSlotDate || !newSlotStart || !newSlotEnd) {
+      setSlotsMessage({ text: 'Please choose a day and enter both start and end times.', type: 'error' });
       return;
     }
     setSlotsLoading(true);
     setSlotsMessage({ text: '', type: '' });
     try {
       const { data } = await api.createSlot({
+        date: newSlotDate,
         startTime: newSlotStart,
         endTime: newSlotEnd,
       });
       setSlots((prev) => [...prev, data]);
+      setNewSlotDate(new Date().toISOString().slice(0, 10));
       setNewSlotStart('');
       setNewSlotEnd('');
       setSlotsMessage({ text: 'Availability slot added successfully!', type: 'success' });
@@ -581,6 +591,15 @@ export default function Settings() {
                   <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '16px' }}>Add Availability Slot</h3>
                   <div className="settings-form-row" style={{ marginBottom: '16px' }}>
                     <div className="settings-form-group" style={{ margin: 0 }}>
+                      <label>Day</label>
+                      <input
+                        type="date"
+                        required
+                        value={newSlotDate}
+                        onChange={(e) => setNewSlotDate(e.target.value)}
+                      />
+                    </div>
+                    <div className="settings-form-group" style={{ margin: 0 }}>
                       <label>Start Time</label>
                       <input
                         type="text"
@@ -614,7 +633,7 @@ export default function Settings() {
                         <div key={s._id} className="slot-item-card">
                           <div className="slot-item-info">
                             <span className="material-symbols-outlined">schedule</span>
-                            <span>{s.startTime} - {s.endTime}</span>
+                            <span>{formatSlotDate(s.date)} • {s.startTime} - {s.endTime}</span>
                           </div>
                           <button
                             type="button"
@@ -653,7 +672,7 @@ export default function Settings() {
         <AdminSidebar activePage="settings" isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
         <div className="admin-content">
           <AdminHeader onMenuClick={() => setMobileMenuOpen(true)} />
-          <main className="admin-main dashboard-main" style={{ padding: '2rem' }}>
+          <main className="admin-main admin-dashboard-main">
             <div className="dashboard-container">{renderContent()}</div>
           </main>
         </div>
@@ -680,7 +699,7 @@ export default function Settings() {
 
   // Fallback / Patient view
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#f8fafc' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--background)' }}>
       <Navbar />
       <main style={{ flex: 1, padding: '3rem 1rem' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>

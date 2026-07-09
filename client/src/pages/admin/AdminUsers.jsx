@@ -228,7 +228,7 @@ export default function AdminUsers() {
       <div className="admin-content">
         <AdminHeader onMenuClick={() => setMobileMenuOpen(true)} />
         
-        <main className="admin-main users-main">
+        <main className="admin-main admin-users-main">
           {/* Page Header */}
           <div className="users-page-header">
             <div>

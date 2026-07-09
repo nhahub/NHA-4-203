@@ -47,7 +47,9 @@ export default function Dashboard() {
   const upcoming = appointments.filter(a => a.status === 'confirmed' || a.status === 'pending');
 
   const formatTime = (timeString) => {
-    if (!timeString) return '';
+    if (!timeString) return 'Time not set';
+    // If already formatted with AM/PM (from slot), return as-is
+    if (timeString.includes('AM') || timeString.includes('PM')) return timeString;
     try {
       const [hour, minute] = timeString.split(':');
       const h = parseInt(hour, 10);
@@ -140,9 +142,12 @@ export default function Dashboard() {
                     const doc = appointment.doctorId;
                     const docName = doc?.userId?.name || 'Doctor';
                     const specialty = doc?.specialty || 'General Practitioner';
-                    const avatar = doc?.userId?.avatar;
-                    const appointmentDate = appointment.slotId?.date || appointment.bookingId?.slotId?.date || appointment.date;
-                    const appointmentTime = appointment.slotId?.startTime || appointment.bookingId?.slotId?.startTime || appointment.time;
+                    const avatarPath = doc?.userId?.profilePicture || '';
+                    const avatar = avatarPath
+                      ? (avatarPath.startsWith('http') ? avatarPath : `http://localhost:5000${avatarPath}`)
+                      : null;
+                    const appointmentDate = appointment.bookingId?.bookedAt || appointment.createdAt;
+                    const appointmentTime = appointment.bookingId?.slotId?.startTime || null;
 
                     return (
                       <div key={appointment._id} className="appointment-premium-card">

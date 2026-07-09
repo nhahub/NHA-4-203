@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import NotificationDropdown from './NotificationDropdown';
+import { useTheme } from '../context/ThemeContext';
 import './DoctorHeader.css';
 
 const API_BASE = 'http://localhost:5000';
@@ -15,19 +15,12 @@ function formatDoctorName(name) {
 export default function DoctorHeader({ onMenuClick }) {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
+  const { theme, toggleTheme } = useTheme();
 
   const getAvatarSrc = () => {
     if (!user?.profilePicture) return '';
     if (user.profilePicture.startsWith('http')) return user.profilePicture;
     return `${API_BASE}${user.profilePicture}`;
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    const q = searchQuery.trim();
-    if (!q) return;
-    navigate(`/doctor/records?search=${encodeURIComponent(q)}`);
   };
 
   return (
@@ -36,19 +29,19 @@ export default function DoctorHeader({ onMenuClick }) {
         <button className="doctor-mobile-menu-btn" onClick={onMenuClick}>
           <span className="material-symbols-outlined">menu</span>
         </button>
-        <form className="doctor-search-bar" onSubmit={handleSearch}>
-          <span className="material-symbols-outlined">search</span>
-          <input
-            type="text"
-            placeholder="Search patients, records, or appointments..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </form>
       </div>
 
       <div className="doctor-header-right">
         <NotificationDropdown />
+        <button
+          className="doctor-header-icon-btn"
+          onClick={toggleTheme}
+          title="Toggle Theme"
+        >
+          <span className="material-symbols-outlined">
+            {theme === 'light' ? 'dark_mode' : 'light_mode'}
+          </span>
+        </button>
         <button
           className="doctor-header-icon-btn"
           onClick={() => navigate('/doctor/settings')}

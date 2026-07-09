@@ -74,6 +74,8 @@
   border: none;
   color: #475569; /* text-slate-600 */
   cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
   transition: all 0.2s;
   display: flex;
   align-items: center;
@@ -81,6 +83,7 @@
 }
 
 .admin-header-icon-btn:hover {
+  background-color: var(--surface-container-low, #f2f3fb);
   color: #0A6EBD;
 }
 

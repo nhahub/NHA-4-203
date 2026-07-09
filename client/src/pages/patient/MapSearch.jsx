@@ -122,7 +122,6 @@ export default function MapSearch() {
     const [specialty, setSpecialty] = useState('');
     const [maxDistance, setMaxDistance] = useState(400); // default 400 km
     const [minRating, setMinRating] = useState('any'); // 'any', '4.0', '4.5'
-    const [availableToday, setAvailableToday] = useState(false);
     const [activeDoctorId, setActiveDoctorId] = useState(null);
 
     // Get User Current Position on mount with watchPosition for live tracking
@@ -194,12 +193,7 @@ export default function MapSearch() {
             if ((doc.rating || 0) < min) return false;
         }
 
-        // 2. Availability Filter
-        if (availableToday && (!doc.availableSlots || doc.availableSlots.length === 0)) {
-            return false;
-        }
-
-        // 3. Location / Distance Filter
+        // 2. Location / Distance Filter
         // Doctors without coordinates are always shown (don't hide them just because no location)
         if (doc.location?.coordinates?.length === 2) {
             const docLng = doc.location.coordinates[0];
@@ -219,7 +213,6 @@ export default function MapSearch() {
         setSpecialty('');
         setMaxDistance(400);
         setMinRating('any');
-        setAvailableToday(false);
         setSearch('');
     };
 
@@ -396,21 +389,7 @@ export default function MapSearch() {
                             </div>
                         </div>
 
-                        {/* Availability Toggle */}
-                        <div className="toggle-badge-wrapper">
-                            <div className="toggle-badge-info">
-                                <span className="material-symbols-outlined text-blue">event_available</span>
-                                <span className="toggle-label-text">Available Today</span>
-                            </div>
-                            <label className="switch-toggle-btn">
-                                <input
-                                    type="checkbox"
-                                    checked={availableToday}
-                                    onChange={(e) => setAvailableToday(e.target.checked)}
-                                />
-                                <span className="slider-round-thumb"></span>
-                            </label>
-                        </div>
+
                     </div>
 
                     <div className="sidebar-overlay-footer">

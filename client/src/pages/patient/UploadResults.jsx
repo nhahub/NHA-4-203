@@ -114,7 +114,7 @@ export default function UploadResults() {
     formData.append('file', file);
     formData.append('testName', testName.trim());
     formData.append('recordId', selectedRecord._id);
-    formData.append('doctorId', selectedRecord?.doctorId?._id || searchParams.get('doctorId') || '');
+    formData.append('doctorId', selectedRecord?.doctorId?._id || selectedRecord?.doctorId || searchParams.get('doctorId') || '');
 
     setUploading(true);
     try {
@@ -321,18 +321,28 @@ export default function UploadResults() {
                       <p className="upload-result-date">
                         Uploaded on {new Date(res.uploadedAt || res.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                       </p>
-                    </div>                     <button
-                      className="upload-result-action upload-result-delete"
-                      title="Delete upload"
-                      onClick={() => handleDeleteClick(res)}
-                      disabled={deleting === res._id}
-                    >
-                      {deleting === res._id ? (
-                        <span className="spinner-small" />
-                      ) : (
-                        <span className="material-symbols-outlined">delete</span>
-                      )}
-                    </button>
+                    </div>
+                    <div className="upload-result-actions" style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        className="upload-result-action"
+                        title="View file"
+                        onClick={() => window.open(`http://localhost:5000/${res.fileUrl}`)}
+                      >
+                        <span className="material-symbols-outlined">visibility</span>
+                      </button>
+                      <button
+                        className="upload-result-action upload-result-delete"
+                        title="Delete upload"
+                        onClick={() => handleDeleteClick(res)}
+                        disabled={deleting === res._id}
+                      >
+                        {deleting === res._id ? (
+                          <span className="spinner-small" />
+                        ) : (
+                          <span className="material-symbols-outlined">delete</span>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

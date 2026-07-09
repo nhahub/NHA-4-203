@@ -1,9 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
 
-/* ============================================
-   Navbar — EasyCare Design System
-   ============================================ */
-
 .navbar {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(12px);
@@ -161,11 +157,23 @@
   background: var(--surface-container, #eceef5);
 }
 
-.navbar-profile-avatar {
+.navbar-profile-avatar,
+.navbar-profile-avatar-fallback {
   width: 32px;
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.navbar-profile-avatar-fallback {
+  background: var(--primary, #005596);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
 }
 
 .navbar-profile-info {

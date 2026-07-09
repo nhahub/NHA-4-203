@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUserAppointments, updateAppointmentStatus } from '../../services/api';
+import { getUserAppointments, updateAppointmentStatus, deleteAppointment } from '../../services/api';
 import useAuth from '../../hooks/useAuth';
 import DoctorSidebar from '../../components/DoctorSidebar';
 import DoctorHeader from '../../components/DoctorHeader';
+import AdminModal from '../../components/AdminModal';
 import './Doctor.css';
 import './DoctorAppointments.css';
 
@@ -14,12 +15,13 @@ export default function DoctorAppointments() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, appointmentId: null });
 
   // Filter and Sort states
-  const [dateTab, setDateTab] = useState('today'); // 'today', 'upcoming', 'past'
+  const [dateTab, setDateTab] = useState('upcoming'); // 'upcoming', 'past'
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('time'); // 'time', 'name', 'age'
+  const [sortBy, setSortBy] = useState('name'); // 'name', 'age'
 
   const fetchData = async () => {
     try {
@@ -48,36 +50,35 @@ export default function DoctorAppointments() {
     }
   };
 
-  // Helper date logic
+  const handleDeleteClick = (id) => {
+    setDeleteModal({ isOpen: true, appointmentId: id });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const id = deleteModal.appointmentId;
+    if (!id) return;
+    try {
+      await deleteAppointment(id);
+      setDeleteModal({ isOpen: false, appointmentId: null });
+      setAppointments((prev) => prev.filter((a) => a._id !== id));
+    } catch (err) {
+      setError('Failed to delete appointment.');
+    }
+  };
+
+  // Helper to get the appointment date (kept for sort logic)
   const getAppointmentDate = (appt) => {
     return appt.bookingId?.bookedAt || appt.createdAt;
   };
 
-  const isSameDay = (d1, d2) => {
-    return d1.getFullYear() === d2.getFullYear() &&
-           d1.getMonth() === d2.getMonth() &&
-           d1.getDate() === d2.getDate();
-  };
-
   // Filter Logic
+  // Upcoming = pending or confirmed; Past = completed (cancelled shown in both with filter)
   const filteredAppointments = appointments.filter((appt) => {
-    const apptDate = new Date(getAppointmentDate(appt));
-    const today = new Date();
-
-    // 1. Date Tab Filtering
-    if (dateTab === 'today') {
-      if (!isSameDay(apptDate, today)) return false;
-    } else if (dateTab === 'upcoming') {
-      // Must be in the future, not today
-      const startOfTomorrow = new Date(today);
-      startOfTomorrow.setDate(today.getDate() + 1);
-      startOfTomorrow.setHours(0, 0, 0, 0);
-      if (apptDate < startOfTomorrow) return false;
+    // 1. Tab Filtering by status
+    if (dateTab === 'upcoming') {
+      if (appt.status === 'completed') return false;
     } else if (dateTab === 'past') {
-      // Must be in the past, not today
-      const startOfToday = new Date(today);
-      startOfToday.setHours(0, 0, 0, 0);
-      if (apptDate >= startOfToday) return false;
+      if (appt.status !== 'completed') return false;
     }
 
     // 2. Search Query Filtering (Patient name)
@@ -86,7 +87,7 @@ export default function DoctorAppointments() {
       return false;
     }
 
-    // 3. Status Filtering
+    // 3. Status Filtering (secondary filter within tab)
     if (statusFilter !== 'all' && appt.status !== statusFilter) {
       return false;
     }
@@ -144,12 +145,6 @@ export default function DoctorAppointments() {
             {/* Custom Tabs Navigation */}
             <div className="doc-appt-tab-container">
               <button 
-                className={`doc-appt-tab-btn ${dateTab === 'today' ? 'active' : ''}`}
-                onClick={() => setDateTab('today')}
-              >
-                Today
-              </button>
-              <button 
                 className={`doc-appt-tab-btn ${dateTab === 'upcoming' ? 'active' : ''}`}
                 onClick={() => setDateTab('upcoming')}
               >
@@ -193,7 +188,6 @@ export default function DoctorAppointments() {
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >
-              <option value="time">Sort by: Time (Soonest)</option>
               <option value="name">Sort by: Name</option>
               <option value="age">Sort by: Age</option>
             </select>
@@ -215,8 +209,10 @@ export default function DoctorAppointments() {
                   const notes = appt.notes || 'General Consultation';
                   
                   const apptDate = new Date(getAppointmentDate(appt));
-                  const formattedTime = appt.bookingId?.slotId
-                    ? `${appt.bookingId.slotId.startTime}`
+                  const slot = appt.bookingId?.slotId;
+                  const formattedDate = apptDate.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+                  const formattedTime = slot?.startTime
+                    ? (slot.endTime ? `${slot.startTime} – ${slot.endTime}` : slot.startTime)
                     : apptDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                   
                   const initials = patientName
@@ -269,8 +265,9 @@ export default function DoctorAppointments() {
                             <span className="material-symbols-outlined">schedule</span>
                           </div>
                           <div>
-                            <p className="doc-appt-detail-label">Time</p>
-                            <p className="doc-appt-detail-value">{formattedTime}</p>
+                            <p className="doc-appt-detail-label">Date & Time</p>
+                            <p className="doc-appt-detail-value">{formattedDate}</p>
+                            <p className="doc-appt-detail-value" style={{ marginTop: '4px' }}>{formattedTime}</p>
                           </div>
                         </div>
 
@@ -332,6 +329,14 @@ export default function DoctorAppointments() {
                             </button>
                           </>
                         )}
+                        {appt.status === 'cancelled' && (
+                          <button 
+                            className="doc-appt-action-solid cancel"
+                            onClick={() => handleDeleteClick(appt._id)}
+                          >
+                            Delete
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -346,6 +351,23 @@ export default function DoctorAppointments() {
           </div>
         </main>
       </div>
+
+      <AdminModal
+        isOpen={deleteModal.isOpen}
+        title="Delete Appointment Record"
+        onClose={() => setDeleteModal({ isOpen: false, appointmentId: null })}
+        onConfirm={handleDeleteConfirm}
+        confirmText="Delete Record"
+        cancelText="Cancel"
+        isDangerous={true}
+      >
+        <p>
+          Are you sure you want to permanently delete this cancelled appointment from your schedule?
+        </p>
+        <p className="admin-modal-subtext">
+          This action will remove the record from your schedule view.
+        </p>
+      </AdminModal>
     </div>
   );
 }

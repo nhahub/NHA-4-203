@@ -205,7 +205,7 @@ export default function AdminAppointments() {
       <div className="admin-content">
         <AdminHeader onMenuClick={() => setMobileMenuOpen(true)} />
 
-        <main className="admin-main appointments-main">
+        <main className="admin-main admin-appointments-main">
           <div className="admin-container-lg">
             {/* Header Section */}
             <div className="appointments-page-header">
@@ -490,7 +490,7 @@ export default function AdminAppointments() {
         <p>
           Are you sure you want to cancel this appointment with <strong>{deleteModal.appointment?.patientId?.name}</strong>?
         </p>
-        <p style={{ color: '#6B7280', fontSize: '14px', marginTop: '12px' }}>
+        <p className="admin-modal-subtext">
           The patient will be notified of the cancellation. This action cannot be undone.
         </p>
       </AdminModal>

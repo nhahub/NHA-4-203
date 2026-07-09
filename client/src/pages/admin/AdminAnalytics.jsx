@@ -149,7 +149,7 @@ export default function AdminAnalytics() {
       <div className="admin-content">
         <AdminHeader onMenuClick={() => setMobileMenuOpen(true)} />
         
-        <main className="admin-main analytics-main">
+        <main className="admin-main admin-analytics-main">
           {/* Dashboard Header */}
           <div className="analytics-header">
             <div>
@@ -378,14 +378,14 @@ export default function AdminAnalytics() {
                   {geoPoints.map((point) => (
                     <Marker key={point.id} position={[point.lat, point.lng]}>
                       <Popup>
-                        <div style={{ fontFamily: 'Manrope, sans-serif', minWidth: 140 }}>
-                          <strong style={{ fontSize: 14, color: '#005596' }}>Dr. {point.name}</strong>
+                        <div className="geo-map-popup">
+                          <strong className="geo-map-popup-name">Dr. {point.name}</strong>
                           <br />
-                          <span style={{ fontSize: 12, color: '#6B7280' }}>{point.specialty}</span>
+                          <span className="geo-map-popup-specialty">{point.specialty}</span>
                           {point.clinic && (
                             <>
                               <br />
-                              <span style={{ fontSize: 11, color: '#94a3b8' }}>{point.clinic}</span>
+                              <span className="geo-map-popup-clinic">{point.clinic}</span>
                             </>
                           )}
                         </div>

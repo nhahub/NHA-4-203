@@ -139,21 +139,7 @@ export default function DoctorDashboard() {
                 Welcome back, Dr. {user?.name || 'Doctor'}. Here is your overview for today.
               </p>
             </div>
-            <button
-              className="doc-dash-action-btn"
-              onClick={() => {
-                if (confirmedToday) {
-                  navigate(
-                    `/doctor/diagnosis?appointmentId=${confirmedToday._id}&patientId=${confirmedToday.patientId?._id}`
-                  );
-                } else {
-                  navigate('/doctor/appointments');
-                }
-              }}
-            >
-              <span className="material-symbols-outlined">add_circle</span>
-              Create New Record
-            </button>
+            
           </div>
 
           <div className="doc-dash-stats-grid">

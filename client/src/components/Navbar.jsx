@@ -5,10 +5,12 @@ import { isStaffRole } from '../utils/roleRoutes';
 import { scrollToTop } from './ScrollToTop';
 import LogoutModal from './LogoutModal';
 import NotificationDropdown from './NotificationDropdown';
+import { useTheme } from '../context/ThemeContext';
 import './Navbar.css';
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -83,6 +85,16 @@ export default function Navbar() {
     if (!isAuthenticated) {
       return (
         <div className="navbar-actions-container">
+          <button
+            className="navbar-icon-btn"
+            type="button"
+            onClick={toggleTheme}
+            title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+          >
+            <span className="material-symbols-outlined">
+              {theme === 'light' ? 'dark_mode' : 'light_mode'}
+            </span>
+          </button>
           <Link to="/login" className="navbar-btn-outlined" onClick={handleNavClick}>Login</Link>
           <Link to="/register" className="navbar-btn-filled" onClick={handleNavClick}>Register</Link>
         </div>
@@ -98,6 +110,11 @@ export default function Navbar() {
       <div className="navbar-actions-container">
         <div className="navbar-icon-group">
           <NotificationDropdown />
+          <button className="navbar-icon-btn" type="button" onClick={toggleTheme} title="Toggle Theme">
+            <span className="material-symbols-outlined">
+              {theme === 'light' ? 'dark_mode' : 'light_mode'}
+            </span>
+          </button>
           <button className="navbar-icon-btn" type="button" onClick={handleSettingsClick}>
             <span className="material-symbols-outlined">settings</span>
           </button>
@@ -110,11 +127,17 @@ export default function Navbar() {
             className="navbar-profile-trigger"
             onClick={() => setDropdownOpen(!dropdownOpen)}
           >
-            <img
-              alt="User Avatar"
-              className="navbar-profile-avatar"
-              src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=005596&color=fff`}
-            />
+            {user?.profilePicture ? (
+              <img
+                alt="User Avatar"
+                className="navbar-profile-avatar"
+                src={user.profilePicture.startsWith('http') ? user.profilePicture : `http://localhost:5000${user.profilePicture}`}
+              />
+            ) : (
+              <div className="navbar-profile-avatar-fallback">
+                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+            )}
             <div className="navbar-profile-info">
               <p className="navbar-profile-name">{user?.name || 'User'}</p>
               <p className="navbar-profile-id">ID: {user?._id ? `PT-${user._id.toString().slice(-5)}` : 'Patient'}</p>

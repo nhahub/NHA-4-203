@@ -54,7 +54,7 @@ const getDoctors = async (req, res) => {
 
     // Build query with populated user data (name, email from User collection)
     let query = Doctor.find(doctorFilter)
-      .populate('userId', 'name email')
+      .populate('userId', 'name email profilePicture')
       .sort({ _id: 1 });
 
     // Apply pagination limit if specified
@@ -103,7 +103,7 @@ const getNearbyDoctors = async (req, res) => {
           $maxDistance: parseInt(maxDistance) || 10000,
         },
       },
-    }).populate('userId', 'name email');
+    }).populate('userId', 'name email profilePicture');
 
     res.status(200).json(doctors);
   } catch (error) {
@@ -114,7 +114,7 @@ const getNearbyDoctors = async (req, res) => {
 // GET /api/doctors/:id
 const getDoctorById = async (req, res) => {
   try {
-    const doctor = await Doctor.findById(req.params.id).populate('userId', 'name email phone');
+    const doctor = await Doctor.findById(req.params.id).populate('userId', 'name email phone profilePicture');
 
     if (!doctor) {
       return res.status(404).json({ message: 'Doctor not found' });

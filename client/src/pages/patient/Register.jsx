@@ -1,10 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import useAuth from '../../hooks/useAuth';
 import './Register.css';
 
 export default function Register() {
+  useEffect(() => {
+    const hadDarkTheme = document.body.classList.contains('dark-theme');
+    document.body.classList.remove('dark-theme');
+    return () => {
+      if (hadDarkTheme) {
+        document.body.classList.add('dark-theme');
+      }
+    };
+  }, []);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

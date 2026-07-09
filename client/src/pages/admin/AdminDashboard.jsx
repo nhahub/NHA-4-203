@@ -52,7 +52,7 @@ export default function AdminDashboard() {
         <AdminSidebar activePage="dashboard" isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
         <div className="admin-content">
           <AdminHeader onMenuClick={() => setMobileMenuOpen(true)} />
-          <div className="admin-main dashboard-main">
+          <div className="admin-main admin-dashboard-main">
             <PageLoader message="Loading dashboard..." />
           </div>
         </div>
@@ -73,7 +73,7 @@ export default function AdminDashboard() {
       <div className="admin-content">
         <AdminHeader onMenuClick={() => setMobileMenuOpen(true)} />
         
-        <main className="admin-main dashboard-main">
+        <main className="admin-main admin-dashboard-main">
           <div className="dashboard-container">
             {/* Page Header */}
             <div className="dashboard-header">
@@ -218,7 +218,7 @@ export default function AdminDashboard() {
                               {user.name.charAt(0).toUpperCase()}
                             </div>
                             <div className="activity-badge bg-teal-strong">
-                              <span className="material-symbols-outlined text-white">person</span>
+                              <span className="material-symbols-outlined">person</span>
                             </div>
                           </div>
                           <div className="activity-info">

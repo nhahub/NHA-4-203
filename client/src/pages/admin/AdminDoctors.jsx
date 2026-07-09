@@ -245,7 +245,7 @@ export default function AdminDoctors() {
       <div className="admin-content">
         <AdminHeader onMenuClick={() => setMobileMenuOpen(true)} />
 
-        <main className="admin-main doctors-main">
+        <main className="admin-main admin-doctors-main">
           {/* Page Title & Actions */}
           <div className="doctors-page-header">
             <div>

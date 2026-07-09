@@ -108,4 +108,42 @@ const updateAppointmentStatus = async (req, res) => {
   }
 };
 
-module.exports = { getUserAppointments, updateAppointmentStatus };
+// DELETE /api/appointments/:id (doctor or patient — cancelled only)
+// Permanently removes a cancelled appointment from the system
+const deleteAppointment = async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id);
+
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found' });
+    }
+
+    // Only cancelled appointments can be deleted
+    if (appointment.status !== 'cancelled') {
+      return res.status(400).json({ message: 'Only cancelled appointments can be deleted' });
+    }
+
+    // Patient can only delete their own cancelled appointments
+    if (req.user.role === 'patient') {
+      if (appointment.patientId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ message: 'You can only delete your own appointments' });
+      }
+    }
+
+    // Doctor can only delete appointments in their schedule
+    if (req.user.role === 'doctor') {
+      const doctor = await Doctor.findOne({ userId: req.user._id });
+      if (!doctor || appointment.doctorId.toString() !== doctor._id.toString()) {
+        return res.status(403).json({ message: 'You can only delete your own appointments' });
+      }
+    }
+
+    await Appointment.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({ message: 'Appointment deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = { getUserAppointments, updateAppointmentStatus, deleteAppointment };

@@ -33,10 +33,15 @@ const createBooking = async (req, res) => {
     slot.isBooked = true;
     await slot.save({ session });
 
+    const bookingDate = slot.date
+      ? new Date(`${slot.date}T00:00:00.000`)
+      : new Date();
+
     const booking = await Booking.create([{
       slotId,
       patientId: req.user._id,
       doctorId,
+      bookedAt: bookingDate,
     }], { session });
 
     const appointment = await Appointment.create([{

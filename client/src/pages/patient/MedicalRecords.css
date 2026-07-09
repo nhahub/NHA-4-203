@@ -571,7 +571,7 @@
     display: none !important;
   }
   .records-page {
-    background: white;
+    background: var(--surface);
     color: black;
   }
   .records-main {
@@ -584,7 +584,7 @@
   }
   .records-expanded-detail {
     display: block !important;
-    background: white;
+    background: var(--surface);
   }
 }
 

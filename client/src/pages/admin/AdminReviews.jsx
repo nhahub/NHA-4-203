@@ -143,7 +143,7 @@ export default function AdminReviews() {
       <div className="admin-content">
         <AdminHeader onMenuClick={() => setMobileMenuOpen(true)} />
         
-        <main className="admin-main reviews-main">
+        <main className="admin-main admin-reviews-main">
           {/* Page Header & Filters */}
           <div className="reviews-page-header">
             <div>
@@ -280,7 +280,7 @@ export default function AdminReviews() {
               ))}
             </div>
           ) : (
-            <div className="empty-state bg-white p-8 rounded-xl align-text-center shadow-sm">
+            <div className="empty-state admin-empty-state">
               <span className="material-symbols-outlined text-4xl text-slate-300">rate_review</span>
               <p className="mt-4 color-slate-medium">No reviews found.</p>
             </div>
@@ -325,7 +325,7 @@ export default function AdminReviews() {
         <p>
           Are you sure you want to approve this review for <strong>Dr. {approveModal.review?.doctorId?.userId?.name}</strong>?
         </p>
-        <p style={{ color: '#6B7280', fontSize: '14px', marginTop: '12px' }}>
+        <p className="admin-modal-subtext">
           The review will be published and visible to other users.
         </p>
       </AdminModal>
@@ -343,7 +343,7 @@ export default function AdminReviews() {
         <p>
           Are you sure you want to flag this review for further investigation?
         </p>
-        <p style={{ color: '#6B7280', fontSize: '14px', marginTop: '12px' }}>
+        <p className="admin-modal-subtext">
           Flagged reviews will be reviewed by the moderation team and may be deleted if they violate our guidelines.
         </p>
       </AdminModal>

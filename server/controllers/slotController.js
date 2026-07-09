@@ -5,7 +5,11 @@ const Doctor = require('../models/Doctor');
 // Doctor creates available time slots for appointments (e.g., 10am-11am on Monday)
 const createSlot = async (req, res) => {
   try {
-    const { startTime, endTime } = req.body;
+    const { startTime, endTime, date } = req.body;
+
+    if (!startTime || !endTime || !date) {
+      return res.status(400).json({ message: 'Date, start time, and end time are required' });
+    }
 
     // Get the doctor profile associated with this user
     const doctor = await Doctor.findOne({ userId: req.user._id });
@@ -16,6 +20,7 @@ const createSlot = async (req, res) => {
     // Create new slot (not yet booked)
     const slot = await Slot.create({
       doctorId: doctor._id,
+      date,
       startTime,
       endTime,
     });
@@ -31,11 +36,19 @@ const createSlot = async (req, res) => {
 // Used by patients to see when they can book an appointment
 const getAvailableSlots = async (req, res) => {
   try {
-    // Find slots that belong to this doctor and haven't been booked yet
-    const slots = await Slot.find({
+    const { date } = req.query;
+
+    const query = {
       doctorId: req.params.doctorId,
       isBooked: false,
-    });
+    };
+
+    if (date) {
+      query.date = date;
+    }
+
+    // Find slots that belong to this doctor and haven't been booked yet
+    const slots = await Slot.find(query).sort({ date: 1, startTime: 1 });
 
     res.status(200).json(slots);
   } catch (error) {
