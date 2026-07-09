@@ -76,6 +76,20 @@ const updateAppointmentStatus = async (req, res) => {
     appointment.status = status;
     await appointment.save();
 
+    // Release the booking slot if cancelled
+    if (status === 'cancelled') {
+      try {
+        const Booking = require('../models/Booking');
+        const Slot = require('../models/Slot');
+        const booking = await Booking.findById(appointment.bookingId);
+        if (booking) {
+          await Slot.findByIdAndUpdate(booking.slotId, { isBooked: false });
+        }
+      } catch (slotErr) {
+        console.error('Failed to release slot on cancel:', slotErr);
+      }
+    }
+
     // Trigger Notification
     try {
       if (req.user.role === 'doctor') {

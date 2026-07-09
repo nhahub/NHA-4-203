@@ -243,7 +243,7 @@ export default function MyAppointments() {
                         {(appt.status === 'confirmed' || appt.status === 'pending') && (
                           <button 
                             className="appointment-btn-reschedule"
-                            onClick={() => navigate(`/patient/book/${doc._id}`)}
+                            onClick={() => navigate(`/patient/book/${doc._id}?reschedule=${appt._id}`)}
                           >
                             Reschedule
                           </button>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getDoctor, getSlots, createBooking } from '../../services/api';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { getDoctor, getSlots, createBooking, updateAppointmentStatus, deleteAppointment } from '../../services/api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import './BookAppointment.css';
@@ -8,6 +8,9 @@ import './BookAppointment.css';
 export default function BookAppointment() {
   const { doctorId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const rescheduleId = searchParams.get('reschedule');
+  
   const [doctor, setDoctor] = useState(null);
   const [slots, setSlots] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
@@ -48,8 +51,23 @@ export default function BookAppointment() {
     setError('');
     try {
       await createBooking({ doctorId, slotId: selectedSlot._id || selectedSlot, notes });
-      setSuccess('Appointment booked successfully!');
-      setTimeout(() => navigate('/'), 2000);
+      
+      // If this is a reschedule, cancel and delete the old appointment
+      if (rescheduleId) {
+        try {
+          // Cancel it first to release the slot
+          await updateAppointmentStatus(rescheduleId, 'cancelled');
+          // Then delete the old appointment from the history
+          await deleteAppointment(rescheduleId);
+        } catch (rescheduleErr) {
+          console.error('Failed to clean up old appointment during reschedule:', rescheduleErr);
+        }
+        setSuccess('Appointment rescheduled successfully!');
+        setTimeout(() => navigate('/patient/appointments'), 2000);
+      } else {
+        setSuccess('Appointment booked successfully!');
+        setTimeout(() => navigate('/'), 2000);
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Booking failed.');
     } finally {
