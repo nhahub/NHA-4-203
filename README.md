@@ -32,6 +32,9 @@ Key Features:
 7. Digital Patient Record  
    EasyCare stores patient medical history, prescriptions, and reports in one secure place for easier tracking and better healthcare management.
 
+8. Real-Time Messaging  
+   Patients and doctors can message each other directly within the platform once a conversation is started for an appointment. Messages are delivered instantly through a live WebSocket connection and are saved to the patient's record, so full conversation history is always available on return.
+
 Benefits:
 
 - Saves time for patients and doctors  
@@ -53,12 +56,14 @@ Tech stack:
 -   Vite
 -   React Router
 -   Axios
+-   Socket.IO Client
 -   CSS
 
 ## Backend
 
 -   Node.js
 -   Express.js
+-   Socket.IO
 
 ## Database
 
@@ -66,4 +71,4 @@ Tech stack:
 -   Mongoose
 
 Conclusion:  
-EasyCare aims to become a smarter and more efficient healthcare platform that improves the experience of both patients and medical professionals. By integrating appointment booking, medical record management, and test tracking into one system, EasyCare offers a comprehensive digital healthcare solution that goes beyond traditional medical booking platforms.
+EasyCare aims to become a smarter and more efficient healthcare platform that improves the experience of both patients and medical professionals. By integrating appointment booking, real-time messaging, medical record management, and test tracking into one system, EasyCare offers a comprehensive digital healthcare solution that goes beyond traditional medical booking platforms.
